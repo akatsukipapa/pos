@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="dark" lang="ja">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Luxe Salon POS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ecc813",
+                        "secondary": "#f472b6",
+                        "background-dark": "#0f0a15",
+                        "neutral-dark": "#1e1629",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] }
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .gold-gradient { background: linear-gradient(135deg, #ecc813 0%, #b3970f 100%); }
+        .pink-glow { box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
+        .premium-border { border: 1px solid rgba(236, 200, 19, 0.3); }
+        body { min-height: 100dvh; }
+        .menu-item-active { @apply bg-secondary border-secondary text-background-dark pink-glow; }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-slate-100">
+
+<div id="app">
+    <!-- メイン画面 -->
+    <div id="main-screen" class="block">
+        <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-3xl">fluid</span>
+                <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase" id="display-salon-name">Luxe Salon POS</h1>
+            </div>
+            <button onclick="switchScreen('settings')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark premium-border active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-secondary">settings</span>
+            </button>
+        </header>
+
+        <main class="p-4 space-y-8 max-w-md mx-auto pb-72">
+            <!-- 選択中サマリー -->
+            <div class="bg-neutral-dark/50 rounded-2xl p-4 border border-white/5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">list_alt</span> 選択中の項目
+                    </h3>
+                    <button onclick="resetSelection()" class="text-[10px] font-bold text-primary uppercase tracking-widest px-3 py-1.5 rounded border-2 border-primary/50 bg-primary/10 hover:bg-primary/20 active:scale-95 transition-all">
+                        リセット
+                    </button>
+                </div>
+                <div id="selected-items-tags" class="flex flex-wrap gap-2">
+                    <!-- JSで挿入 -->
+                </div>
+            </div>
+
+            <!-- メニューセクション -->
+            <div id="menu-container" class="space-y-8">
+                <!-- JSで動的に生成 -->
+            </div>
+
+            <!-- 手入力セクション -->
+            <section class="space-y-4 pt-4 border-t border-white/10">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest px-2">手入力項目</h3>
+                <div class="bg-neutral-dark p-6 rounded-2xl premium-border space-y-4">
+                    <input id="custom-name" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-3 outline-none focus:ring-1 focus:ring-primary" placeholder="項目名" type="text"/>
+                    <input id="custom-price" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-3 outline-none focus:ring-1 focus:ring-primary" placeholder="金額" type="number"/>
+                    <button onclick="addCustomItem()" class="w-full py-3 bg-secondary/20 text-secondary border border-secondary/30 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-secondary/30">
+                        <span class="material-symbols-outlined">add_circle</span> 追加
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- フッター（合計・送信） -->
+        <footer class="fixed bottom-0 left-0 right-0 z-50 bg-neutral-dark/95 backdrop-blur-xl border-t border-primary/30 p-4 pb-8 shadow-2xl">
+            <div class="max-w-md mx-auto space-y-4">
+                <div class="flex items-end justify-between px-2">
+                    <div class="flex flex-col">
+                        <span id="item-count" class="text-secondary text-[10px] font-bold tracking-widest uppercase">選択済み: 0点</span>
+                        <span class="text-slate-200 text-sm font-bold">合計金額</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-primary text-xs font-bold block">JPY</span>
+                        <span id="total-display" class="text-4xl font-black text-white tracking-tighter">¥ 0</span>
+                    </div>
+                </div>
+                <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg shadow-lg flex items-center justify-center gap-3 active:scale-[0.97] transition-all">
+                    <span class="material-symbols-outlined font-black">send_to_mobile</span> 売上を送信する
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 設定画面 -->
+    <div id="settings-screen" class="hidden min-h-screen bg-background-dark">
+        <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center gap-3">
+            <button onclick="switchScreen('main')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark premium-border">
+                <span class="material-symbols-outlined text-primary">arrow_back</span>
+            </button>
+            <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase">設定</h1>
+        </header>
+
+        <main class="p-4 space-y-6 max-w-md mx-auto pb-20">
+            <!-- GAS設定 -->
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-primary tracking-widest uppercase flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">cloud_sync</span> GAS Web App URL
+                    </h2>
+                    <span id="gas-status" class="text-[10px] font-bold px-2 py-1 rounded bg-slate-800 text-slate-400">未設定</span>
+                </div>
+                <input id="gas-url-input" oninput="updateGasStatus()" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary" placeholder="https://script.google.com/macros/s/.../exec" type="text"/>
+                <button onclick="saveAllSettings()" class="w-full py-2 bg-primary text-background-dark font-bold rounded-lg text-sm">URLを保存</button>
+            </div>
+
+            <!-- サロン名設定 -->
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-2">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">サロン名</label>
+                <input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-primary" type="text"/>
+            </div>
+
+            <!-- メニュー編集 -->
+            <div id="settings-menu-editor" class="space-y-4">
+                <!-- JSで動的に生成 -->
+            </div>
+
+            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">library_add</span> 新規カテゴリーを追加
+            </button>
+        </main>
+    </div>
+</div>
+
+<script>
+    // --- データモデル ---
+    let state = {
+        salonName: "Luxe Salon POS",
+        gasUrl: "",
+        categories: [
+            { id: "cat1", title: "カット", items: [{ id: "i1", name: "カット", price: 5000 }, { id: "i2", name: "前髪カット", price: 1000 }] },
+            { id: "cat2", title: "カラー", items: [{ id: "i3", name: "フルカラー", price: 7000 }] }
+        ],
+        selectedItems: [] // {id, name, price}
+    };
+
+    // --- 初期化 ---
+    function init() {
+        const saved = localStorage.getItem('salon_pos_state');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            state = { ...state, ...parsed, selectedItems: [] }; // 選択状態はリセット
+        }
+        updateGasStatus();
+        renderAll();
+    }
+
+    // --- 画面切り替え ---
+    function switchScreen(screen) {
+        if (screen === 'main') {
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('settings-screen').classList.add('hidden');
+            renderMain();
+        } else {
+            document.getElementById('main-screen').classList.add('hidden');
+            document.getElementById('settings-screen').classList.remove('hidden');
+            renderSettings();
+        }
+    }
+
+    // --- メイン画面の描画 ---
+    function renderMain() {
+        document.getElementById('display-salon-name').textContent = state.salonName;
+        
+        // メニューボタン生成
+        const container = document.getElementById('menu-container');
+        container.innerHTML = state.categories.map(cat => `
+            <section class="space-y-4">
+                <div class="flex items-center gap-2 px-2">
+                    <div class="h-4 w-1 bg-secondary rounded-full"></div>
+                    <h2 class="text-lg font-bold tracking-tight">${cat.title}</h2>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    ${cat.items.map(item => {
+                        const active = state.selectedItems.some(si => si.id === item.id);
+                        return `
+                            <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" 
+                                class="flex items-center justify-between p-4 rounded-xl transition-all border premium-border ${active ? 'menu-item-active' : 'bg-neutral-dark'}">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined">${active ? 'check_circle' : 'add_circle'}</span>
+                                    <span class="font-bold">${item.name}</span>
+                                </div>
+                                <span class="font-bold">¥${item.price.toLocaleString()}</span>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            </section>
+        `).join('');
+
+        updateSummary();
+    }
+
+    // --- 設定画面の描画 ---
+    function renderSettings() {
+        document.getElementById('salon-name-input').value = state.salonName;
+        document.getElementById('gas-url-input').value = state.gasUrl;
+
+        const editor = document.getElementById('settings-menu-editor');
+        editor.innerHTML = state.categories.map((cat, cIdx) => `
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4">
+                <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                    <input onchange="updateCategoryTitle(${cIdx}, this.value)" class="bg-transparent border-none font-bold text-primary p-0 focus:ring-0" value="${cat.title}" />
+                    <button onclick="deleteCategory(${cIdx})" class="text-xs text-red-400">削除</button>
+                </div>
+                <div class="space-y-3">
+                    ${cat.items.map((item, iIdx) => `
+                        <div class="flex gap-2">
+                            <input onchange="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="flex-1 bg-background-dark/50 border-white/10 rounded-lg text-xs" value="${item.name}" />
+                            <input onchange="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-20 bg-background-dark/50 border-white/10 rounded-lg text-xs" type="number" value="${item.price}" />
+                            <button onclick="deleteItem(${cIdx}, ${iIdx})" class="text-slate-500"><span class="material-symbols-outlined text-sm">delete</span></button>
+                        </div>
+                    `).join('')}
+                    <button onclick="addItem(${cIdx})" class="w-full py-2 border border-dashed border-white/20 rounded-lg text-[10px] text-slate-500">+ 項目追加</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- 計算・選択ロジック ---
+    function toggleItem(id, name, price) {
+        const index = state.selectedItems.findIndex(i => i.id === id);
+        if (index > -1) {
+            state.selectedItems.splice(index, 1);
+        } else {
+            state.selectedItems.push({ id, name, price });
+        }
+        renderMain();
+    }
+
+    function addCustomItem() {
+        const name = document.getElementById('custom-name').value;
+        const price = parseInt(document.getElementById('custom-price').value);
+        if (!name || isNaN(price)) return;
+
+        const id = "custom_" + Date.now();
+        state.selectedItems.push({ id, name, price });
+        
+        document.getElementById('custom-name').value = "";
+        document.getElementById('custom-price').value = "";
+        renderMain();
+    }
+
+    function resetSelection() {
+        state.selectedItems = [];
+        renderMain();
+    }
+
+    function updateSummary() {
+        const total = state.selectedItems.reduce((sum, item) => sum + item.price, 0);
+        document.getElementById('total-display').textContent = `¥ ${total.toLocaleString()}`;
+        document.getElementById('item-count').textContent = `選択済み: ${state.selectedItems.length}点`;
+        
+        const tags = document.getElementById('selected-items-tags');
+        tags.innerHTML = state.selectedItems.map(item => `
+            <span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-bold rounded-full">
+                ${item.name}
+            </span>
+        `).join('');
+    }
+
+    // --- 設定変更ロジック ---
+    function updateCategoryTitle(idx, val) { state.categories[idx].title = val; saveAllSettings(); }
+    function updateItem(cIdx, iIdx, key, val) { 
+        state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) : val; 
+        saveAllSettings(); 
+    }
+    function addItem(cIdx) { 
+        state.categories[cIdx].items.push({ id: "i" + Date.now(), name: "新メニュー", price: 0 }); 
+        renderSettings(); 
+        saveAllSettings();
+    }
+    function deleteItem(cIdx, iIdx) { 
+        state.categories[cIdx].items.splice(iIdx, 1); 
+        renderSettings(); 
+        saveAllSettings();
+    }
+    function addNewCategory() {
+        state.categories.push({ id: "c" + Date.now(), title: "新カテゴリー", items: [] });
+        renderSettings();
+        saveAllSettings();
+    }
+    function deleteCategory(idx) {
+        state.categories.splice(idx, 1);
+        renderSettings();
+        saveAllSettings();
+    }
+
+    function updateGasStatus() {
+        const url = document.getElementById('gas-url-input')?.value || state.gasUrl;
+        const status = document.getElementById('gas-status');
+        if (url && url.startsWith('http')) {
+            status.textContent = "設定済み ✔";
+            status.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-900/50 text-green-400";
+        } else {
+            status.textContent = "未設定";
+            status.className = "text-[10px] font-bold px-2 py-1 rounded bg-slate-800 text-slate-400";
+        }
+    }
+
+    function saveAllSettings() {
+        state.salonName = document.getElementById('salon-name-input').value || state.salonName;
+        state.gasUrl = document.getElementById('gas-url-input').value || state.gasUrl;
+        localStorage.setItem('salon_pos_state', JSON.stringify(state));
+        updateGasStatus();
+    }
+
+    // --- 売上送信機能 ---
+    async function sendSalesData() {
+        if (state.selectedItems.length === 0) {
+            alert("項目が選択されていません。");
+            return;
+        }
+        if (!state.gasUrl) {
+            alert("設定画面でGASのURLを設定してください。");
+            return;
+        }
+
+        const total = state.selectedItems.reduce((sum, item) => sum + item.price, 0);
+        const payload = {
+            timestamp: new Date().toLocaleString('ja-JP'),
+            salonName: state.salonName,
+            items: state.selectedItems.map(i => i.name).join(', '),
+            total: total,
+            details: state.selectedItems
+        };
+
+        try {
+            // 送信中表示などのUIフィードバックをここに入れることも可能
+            const response = await fetch(state.gasUrl, {
+                method: 'POST',
+                mode: 'no-cors', // GASの仕様上、no-corsが必要な場合が多い
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            alert("売上を送信しました！");
+            resetSelection();
+        } catch (error) {
+            console.error(error);
+            alert("送信に失敗しました。URLを確認してください。");
+        }
+    }
+
+    function renderAll() {
+        renderMain();
+        renderSettings();
+    }
+
+    // 起動
+    init();
+</script>
+</body>
+</html>

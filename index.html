@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.06</title>
+    <title>美容室POS v1.07</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -89,7 +89,7 @@
                         <span class="material-symbols-outlined font-black">send_to_mobile</span> 売上を送信する
                     </button>
                     <div class="text-center">
-                        <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.06</span>
+                        <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.07</span>
                     </div>
                 </div>
             </div>
@@ -119,7 +119,7 @@
 
             <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-2">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">サロン名</label>
-                <input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-primary text-white" type="text"/>
+                <input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-primary text-white" type="text" oninput="state.salonName = this.value; sync();"/>
             </div>
 
             <div id="settings-menu-editor" class="space-y-4"></div>
@@ -155,7 +155,7 @@
     };
 
     function init() {
-        const saved = localStorage.getItem('salon_pos_state_v6');
+        const saved = localStorage.getItem('salon_pos_state_v7');
         if (saved) {
             const parsed = JSON.parse(saved);
             state = { ...state, ...parsed, selectedItems: [] };
@@ -167,8 +167,7 @@
     function switchScreen(screen) {
         document.getElementById('main-screen').classList.toggle('hidden', screen !== 'main');
         document.getElementById('settings-screen').classList.toggle('hidden', screen !== 'settings');
-        if(screen === 'main') renderMain();
-        if(screen === 'settings') renderSettings();
+        renderAll();
     }
 
     function renderMain() {
@@ -215,7 +214,7 @@
                     <div class="flex flex-col flex-1">
                         <input oninput="updateCategoryTitle(${cIdx}, this.value)" 
                                class="bg-transparent border-none font-bold text-primary p-0 focus:ring-0 w-full" 
-                               placeholder="カテゴリー名を入力..."
+                               placeholder="新カテゴリー名を入力..."
                                value="${cat.title === '新カテゴリー' ? '' : cat.title}" />
                         <input oninput="updateCategorySubtitle(${cIdx}, this.value)" class="bg-transparent border-none text-[10px] text-slate-500 p-0 focus:ring-0 w-full uppercase" placeholder="SUBTITLE" value="${cat.subtitle || ''}" />
                     </div>
@@ -270,7 +269,11 @@
         state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; 
         sync(); 
     }
-    function sync() { localStorage.setItem('salon_pos_state_v6', JSON.stringify(state)); }
+    
+    // 保存と同時にメイン画面の変数を更新するための関数
+    function sync() { 
+        localStorage.setItem('salon_pos_state_v7', JSON.stringify(state));
+    }
 
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i" + Date.now(), name: "新メニュー", price: 0 }); renderSettings(); sync(); }
     function deleteItem(cIdx, iIdx) { state.categories[cIdx].items.splice(iIdx, 1); renderSettings(); sync(); }
@@ -289,13 +292,10 @@
     }
 
     function saveAllSettings() {
-        const inputUrl = document.getElementById('gas-url-input').value;
-        state.salonName = document.getElementById('salon-name-input').value;
-        state.gasUrl = inputUrl;
+        state.gasUrl = document.getElementById('gas-url-input').value;
         sync();
-        updateGasStatusUI(inputUrl);
+        updateGasStatusUI(state.gasUrl);
         alert("設定を保存しました。");
-        renderMain();
     }
 
     async function sendSalesData() {

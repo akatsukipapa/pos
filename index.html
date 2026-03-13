@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.07</title>
+    <title>美容室POS v1.08</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -89,7 +89,7 @@
                         <span class="material-symbols-outlined font-black">send_to_mobile</span> 売上を送信する
                     </button>
                     <div class="text-center">
-                        <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.07</span>
+                        <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.08</span>
                     </div>
                 </div>
             </div>
@@ -136,26 +136,13 @@
         salonName: "Luxe Salon POS",
         gasUrl: "",
         categories: [
-            { id: "cat1", title: "カット", subtitle: "CUT", items: [
-                { id: "i1", name: "ドライカット", price: 1800 },
-                { id: "i2", name: "カット", price: 2700 },
-                { id: "i3", name: "前髪カット", price: 500 }
-            ]},
-            { id: "cat2", title: "パーマ", subtitle: "PERM", items: [
-                { id: "i4", name: "部分パーマ", price: 3500 },
-                { id: "i5", name: "パーマ", price: 5500 },
-                { id: "i6", name: "デジタルパーマ", price: 9500 }
-            ]},
-            { id: "cat3", title: "カラー", subtitle: "COLOR", items: [
-                { id: "i7", name: "カラー", price: 4500 },
-                { id: "i8", name: "メテオカラー", price: 8800 }
-            ]}
+            { id: "cat1", title: "カット", subtitle: "CUT", items: [{ id: "i1", name: "カット", price: 2700 }] }
         ],
         selectedItems: []
     };
 
     function init() {
-        const saved = localStorage.getItem('salon_pos_state_v7');
+        const saved = localStorage.getItem('salon_pos_state_v8');
         if (saved) {
             const parsed = JSON.parse(saved);
             state = { ...state, ...parsed, selectedItems: [] };
@@ -177,24 +164,20 @@
             <section class="space-y-4">
                 <div class="flex items-center gap-2 px-2">
                     <div class="h-4 w-1 bg-secondary rounded-full"></div>
-                    <h2 class="text-lg font-bold tracking-tight">${cat.title} <span class="text-[10px] font-normal text-slate-500 uppercase ml-1">${cat.subtitle || ''}</span></h2>
+                    <h2 class="text-lg font-bold tracking-tight">
+                        ${cat.title} ${cat.subtitle ? `<span class="text-[10px] font-normal text-slate-500 uppercase ml-1">${cat.subtitle}</span>` : ''}
+                    </h2>
                 </div>
                 <div class="grid grid-cols-1 gap-3">
                     ${cat.items.map(item => {
                         const active = state.selectedItems.some(si => si.id === item.id);
-                        const isSpecial = item.price >= 8000;
-                        let btnClass = 'flex items-center justify-between p-4 rounded-xl transition-all border w-full ';
-                        if (active) btnClass += 'menu-item-active';
-                        else if (isSpecial) btnClass += 'bg-neutral-dark border-primary/50 text-primary';
-                        else btnClass += 'bg-neutral-dark premium-border';
-
                         return `
-                            <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="${btnClass}">
+                            <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="flex items-center justify-between p-4 rounded-xl transition-all border w-full ${active ? 'menu-item-active' : 'bg-neutral-dark premium-border'}">
                                 <div class="flex items-center gap-3">
-                                    <span class="material-symbols-outlined">${active ? 'check_circle' : (isSpecial ? 'stars' : 'add_circle')}</span>
+                                    <span class="material-symbols-outlined">${active ? 'check_circle' : 'add_circle'}</span>
                                     <span class="font-bold">${item.name}</span>
                                 </div>
-                                <span class="font-bold ${!active && isSpecial ? 'text-primary' : (active ? '' : 'text-secondary')}">¥${item.price.toLocaleString()}</span>
+                                <span class="font-bold ${active ? '' : 'text-secondary'}">¥${item.price.toLocaleString()}</span>
                             </button>
                         `;
                     }).join('')}
@@ -214,9 +197,9 @@
                     <div class="flex flex-col flex-1">
                         <input oninput="updateCategoryTitle(${cIdx}, this.value)" 
                                class="bg-transparent border-none font-bold text-primary p-0 focus:ring-0 w-full" 
-                               placeholder="新カテゴリー名を入力..."
+                               placeholder="新カテゴリー"
                                value="${cat.title === '新カテゴリー' ? '' : cat.title}" />
-                        <input oninput="updateCategorySubtitle(${cIdx}, this.value)" class="bg-transparent border-none text-[10px] text-slate-500 p-0 focus:ring-0 w-full uppercase" placeholder="SUBTITLE" value="${cat.subtitle || ''}" />
+                        <input oninput="updateCategorySubtitle(${cIdx}, this.value)" class="bg-transparent border-none text-[10px] text-slate-500 p-0 focus:ring-0 w-full uppercase" placeholder="サブタイトル (任意)" value="${cat.subtitle || ''}" />
                     </div>
                     <button onclick="deleteCategory(${cIdx})" class="text-xs text-red-400">削除</button>
                 </div>
@@ -258,37 +241,23 @@
         document.getElementById('total-display').textContent = `¥ ${total.toLocaleString()}`;
         document.getElementById('item-count').textContent = `選択済み: ${state.selectedItems.length}点`;
         const tags = document.getElementById('selected-items-tags');
-        tags.innerHTML = state.selectedItems.map(item => `
-            <span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-bold rounded-full">${item.name}</span>
-        `).join('');
+        tags.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-bold rounded-full">${item.name}</span>`).join('');
     }
 
     function updateCategoryTitle(idx, val) { state.categories[idx].title = val || "新カテゴリー"; sync(); }
     function updateCategorySubtitle(idx, val) { state.categories[idx].subtitle = val; sync(); }
-    function updateItem(cIdx, iIdx, key, val) { 
-        state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; 
-        sync(); 
-    }
-    
-    // 保存と同時にメイン画面の変数を更新するための関数
-    function sync() { 
-        localStorage.setItem('salon_pos_state_v7', JSON.stringify(state));
-    }
+    function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; sync(); }
+    function sync() { localStorage.setItem('salon_pos_state_v8', JSON.stringify(state)); }
 
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i" + Date.now(), name: "新メニュー", price: 0 }); renderSettings(); sync(); }
     function deleteItem(cIdx, iIdx) { state.categories[cIdx].items.splice(iIdx, 1); renderSettings(); sync(); }
-    function addNewCategory() { state.categories.push({ id: "c" + Date.now(), title: "新カテゴリー", subtitle: "NEW", items: [] }); renderSettings(); sync(); }
+    function addNewCategory() { state.categories.push({ id: "c" + Date.now(), title: "新カテゴリー", subtitle: "", items: [] }); renderSettings(); sync(); }
     function deleteCategory(idx) { state.categories.splice(idx, 1); renderSettings(); sync(); }
 
     function updateGasStatusUI(url) {
         const status = document.getElementById('gas-status');
-        if (url && url.trim().startsWith('http')) {
-            status.textContent = "設定済み ✔";
-            status.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-900/50 text-green-400";
-        } else {
-            status.textContent = "未設定";
-            status.className = "text-[10px] font-bold px-2 py-1 rounded bg-slate-800 text-slate-400";
-        }
+        status.textContent = (url && url.startsWith('http')) ? "設定済み ✔" : "未設定";
+        status.className = `text-[10px] font-bold px-2 py-1 rounded ${(url && url.startsWith('http')) ? 'bg-green-900/50 text-green-400' : 'bg-slate-800 text-slate-400'}`;
     }
 
     function saveAllSettings() {
@@ -299,19 +268,11 @@
     }
 
     async function sendSalesData() {
-        if (state.selectedItems.length === 0) { alert("項目を選択してください"); return; }
-        if (!state.gasUrl) { alert("GAS URLを設定してください"); return; }
+        if (state.selectedItems.length === 0 || !state.gasUrl) return;
         const total = state.selectedItems.reduce((sum, item) => sum + item.price, 0);
         const payload = { timestamp: new Date().toLocaleString('ja-JP'), items: state.selectedItems.map(i => i.name).join(', '), total: total };
         try {
             await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("送信しました！");
+            alert("送信完了！");
             resetSelection();
-        } catch (e) { alert("送信エラー"); }
-    }
-
-    function renderAll() { renderMain(); renderSettings(); }
-    init();
-</script>
-</body>
-</html>
+        } catch

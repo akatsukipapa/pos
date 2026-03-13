@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.03</title>
+    <title>美容室POS v1.04</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -89,7 +89,7 @@
                         <span class="material-symbols-outlined font-black">send_to_mobile</span> 売上を送信する
                     </button>
                     <div class="text-center">
-                        <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.03</span>
+                        <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.04</span>
                     </div>
                 </div>
             </div>
@@ -112,8 +112,8 @@
                     </h2>
                     <span id="gas-status" class="text-[10px] font-bold px-2 py-1 rounded bg-slate-800 text-slate-400">未設定</span>
                 </div>
-                <input id="gas-url-input" oninput="updateGasStatus()" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary text-white" placeholder="https://script.google.com/macros/s/.../exec" type="text"/>
-                <p class="text-[10px] text-slate-500 mt-1">※設定後に「保存」を押してください</p>
+                <input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-sm outline-none focus:border-primary text-white" placeholder="https://script.google.com/macros/s/.../exec" type="text"/>
+                <p class="text-[10px] text-slate-500 mt-1">※設定を有効にするには下の「保存」を押してください</p>
                 <button onclick="saveAllSettings()" class="w-full py-2 bg-primary text-background-dark font-bold rounded-lg text-sm">設定を保存</button>
             </div>
 
@@ -129,7 +129,7 @@
             </button>
 
             <div class="text-center pt-12 pb-8">
-                <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.03</span>
+                <span class="text-[10px] text-slate-600 font-bold tracking-widest uppercase text-version">v1.04</span>
             </div>
         </main>
     </div>
@@ -159,13 +159,13 @@
     };
 
     function init() {
-        const saved = localStorage.getItem('salon_pos_state_v3');
+        const saved = localStorage.getItem('salon_pos_state_v4');
         if (saved) {
             const parsed = JSON.parse(saved);
             state = { ...state, ...parsed, selectedItems: [] };
         }
         renderAll();
-        updateGasStatus();
+        updateGasStatusUI(state.gasUrl); // 保存済みのURLがあれば表示に反映
     }
 
     function switchScreen(screen) {
@@ -216,8 +216,12 @@
             <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4">
                 <div class="flex items-center justify-between border-b border-white/10 pb-2">
                     <div class="flex flex-col flex-1">
-                        <input oninput="updateCategoryTitle(${cIdx}, this.value)" class="bg-transparent border-none font-bold text-primary p-0 focus:ring-0 w-full" value="${cat.title}" />
-                        <input oninput="updateCategorySubtitle(${cIdx}, this.value)" class="bg-transparent border-none text-[10px] text-slate-500 p-0 focus:ring-0 w-full uppercase" value="${cat.subtitle || ''}" />
+                        <label class="text-[10px] text-slate-600 font-bold uppercase">カテゴリー名</label>
+                        <input oninput="updateCategoryTitle(${cIdx}, this.value)" 
+                               class="bg-transparent border-none font-bold text-primary p-0 focus:ring-0 w-full" 
+                               placeholder="新カテゴリー名を入力..." 
+                               value="${cat.title === '新カテゴリー' ? '' : cat.title}" />
+                        <input oninput="updateCategorySubtitle(${cIdx}, this.value)" class="bg-transparent border-none text-[10px] text-slate-500 p-0 focus:ring-0 w-full uppercase" placeholder="SUBTITLE (例: CUT)" value="${cat.subtitle || ''}" />
                     </div>
                     <button onclick="deleteCategory(${cIdx})" class="text-xs text-red-400">削除</button>
                 </div>
@@ -239,88 +243,4 @@
         const index = state.selectedItems.findIndex(i => i.id === id);
         if (index > -1) state.selectedItems.splice(index, 1);
         else state.selectedItems.push({ id, name, price });
-        renderMain();
-    }
-
-    function addCustomItem() {
-        const name = document.getElementById('custom-name').value;
-        const price = parseInt(document.getElementById('custom-price').value);
-        if (!name || isNaN(price)) return;
-        state.selectedItems.push({ id: "custom_" + Date.now(), name, price });
-        document.getElementById('custom-name').value = "";
-        document.getElementById('custom-price').value = "";
-        renderMain();
-    }
-
-    function resetSelection() { state.selectedItems = []; renderMain(); }
-
-    function updateSummary() {
-        const total = state.selectedItems.reduce((sum, item) => sum + item.price, 0);
-        document.getElementById('total-display').textContent = `¥ ${total.toLocaleString()}`;
-        document.getElementById('item-count').textContent = `選択済み: ${state.selectedItems.length}点`;
-        const tags = document.getElementById('selected-items-tags');
-        tags.innerHTML = state.selectedItems.map(item => `
-            <span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] font-bold rounded-full">${item.name} ¥${item.price.toLocaleString()}</span>
-        `).join('');
-    }
-
-    function updateCategoryTitle(idx, val) { state.categories[idx].title = val; sync(); }
-    function updateCategorySubtitle(idx, val) { state.categories[idx].subtitle = val; sync(); }
-    function updateItem(cIdx, iIdx, key, val) { 
-        state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) : val; 
-        sync(); 
-    }
-    function sync() { localStorage.setItem('salon_pos_state_v3', JSON.stringify(state)); }
-
-    function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i" + Date.now(), name: "新メニュー", price: 0 }); renderSettings(); sync(); }
-    function deleteItem(cIdx, iIdx) { state.categories[cIdx].items.splice(iIdx, 1); renderSettings(); sync(); }
-    function addNewCategory() { state.categories.push({ id: "c" + Date.now(), title: "新カテゴリー", subtitle: "NEW", items: [] }); renderSettings(); sync(); }
-    function deleteCategory(idx) { state.categories.splice(idx, 1); renderSettings(); sync(); }
-
-    function updateGasStatus() {
-        const url = document.getElementById('gas-url-input').value || state.gasUrl;
-        const status = document.getElementById('gas-status');
-        if (url && url.trim().startsWith('http')) {
-            status.textContent = "設定済み ✔";
-            status.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-900/50 text-green-400";
-        } else {
-            status.textContent = "未設定";
-            status.className = "text-[10px] font-bold px-2 py-1 rounded bg-slate-800 text-slate-400";
-        }
-    }
-
-    function saveAllSettings() {
-        state.salonName = document.getElementById('salon-name-input').value;
-        state.gasUrl = document.getElementById('gas-url-input').value;
-        sync();
-        updateGasStatus();
-        alert("設定を保存しました。メイン画面に反映します。");
-        renderMain();
-    }
-
-    async function sendSalesData() {
-        if (state.selectedItems.length === 0) { alert("項目が選択されていません。"); return; }
-        if (!state.gasUrl) { alert("GASのURLを設定してください。"); return; }
-
-        const total = state.selectedItems.reduce((sum, item) => sum + item.price, 0);
-        const payload = {
-            timestamp: new Date().toLocaleString('ja-JP'),
-            items: state.selectedItems.map(i => i.name).join(', '),
-            total: total
-        };
-
-        try {
-            // no-corsモードでも、Google側のdoPostは動きます
-            await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("売上を送信しました！");
-            resetSelection();
-        } catch (error) {
-            alert("送信に失敗しました。");
-        }
-    }
-
-    function renderAll() { renderMain(); renderSettings(); }
-    init();
-</script>
-</body>
-</html>
+        renderMain

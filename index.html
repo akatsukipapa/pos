@@ -70,7 +70,7 @@
             <h1 class="text-xl font-extrabold text-primary uppercase">設定</h1>
         </header>
         <main class="p-4 space-y-6 max-w-md mx-auto">
-            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4 shadow-xl">
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4 shadow-xl text-left">
                 <div><label class="text-[10px] font-bold text-primary uppercase">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-white" type="text"/></div>
                 <div><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-xs text-white" type="text"/></div>
                 <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl active:scale-95 shadow-lg">変更を保存</button>
@@ -96,8 +96,9 @@
 </div>
 
 <script>
-    // 検証済みの黄金メニューデータを初期値としてセット
+    const VERSION = "v1.41";
     const DEFAULT_STATE = {
+        version: VERSION,
         salonName: "Luxe Salon", 
         gasUrl: "", 
         selectedItems: [],
@@ -125,7 +126,13 @@
         const saved = localStorage.getItem('salon_pos_final_data');
         if (saved) {
             const parsed = JSON.parse(saved);
-            state = { ...state, ...parsed, selectedItems: [] };
+            // 保存データが古いバージョンの場合、メニューだけは強制的に最新(DEFAULT_STATE)を優先するロジック
+            if (parsed.version !== VERSION) {
+                state = { ...DEFAULT_STATE, gasUrl: parsed.gasUrl || "", salonName: parsed.salonName || "Luxe Salon" };
+                localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
+            } else {
+                state = { ...state, ...parsed, selectedItems: [] };
+            }
         }
         renderMain();
     }
@@ -160,11 +167,11 @@
         document.getElementById('gas-url-input').value = state.gasUrl;
         const editor = document.getElementById('settings-menu-editor');
         editor.innerHTML = state.categories.map((cat, cIdx) => `
-            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative shadow-lg">
-                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 font-bold text-xs uppercase text-left">消去</button>
+            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative shadow-lg text-left">
+                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 font-bold text-xs uppercase">消去</button>
                 <div class="grid gap-1">
-                    <label class="text-[9px] font-bold text-slate-500 uppercase text-left">カテゴリー名</label>
-                    <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold text-left" value="${cat.title}" />
+                    <label class="text-[9px] font-bold text-slate-500 uppercase">カテゴリー名</label>
+                    <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold" value="${cat.title}" />
                 </div>
                 <div class="space-y-3 pt-2">
                     ${cat.items.map((item, iIdx) => `
@@ -207,8 +214,9 @@
     function saveAllSettings() {
         state.salonName = document.getElementById('salon-name-input').value;
         state.gasUrl = document.getElementById('gas-url-input').value;
+        state.version = VERSION; // 保存時に最新バージョンを刻印
         localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-        alert("設定を保存しました");
+        alert("設定を保存しました (v1.41)");
         switchScreen('main');
     }
 
@@ -230,7 +238,7 @@
 
     async function openHistoryWithAuth() {
         if (!state.gasUrl) return alert("URLを設定してください");
-        const pass = prompt("パスワードを入力");
+        const pass = prompt("履歴パスワード");
         if (!pass) return;
         try {
             const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: pass }) });
@@ -247,11 +255,11 @@
         let totalYear = 0;
         container.innerHTML = months.map(m => {
             totalYear += summary[m];
-            return `<button onclick="fetchDetails('${m}', '${pass}')" class="flex justify-between p-5 bg-neutral-dark rounded-xl border border-white/5 active:scale-95 shadow-xl">
-                <span class="font-bold text-slate-300 text-left">${m}</span>
+            return `<button onclick="fetchDetails('${m}', '${pass}')" class="flex justify-between p-5 bg-neutral-dark rounded-xl border border-white/5 active:scale-95 shadow-xl text-left">
+                <span class="font-bold text-slate-300">${m}</span>
                 <span class="font-bold text-secondary text-lg">¥${summary[m].toLocaleString()}</span>
             </button>`;
-        }).join('') + `<div class="p-5 bg-primary/10 border-2 border-primary/30 rounded-xl flex justify-between mt-4"><span class="font-black text-primary uppercase">Year Total</span><span class="font-black text-primary text-2xl italic">¥${totalYear.toLocaleString()}</span></div>`;
+        }).join('') + `<div class="p-5 bg-primary/10 border-2 border-primary/30 rounded-xl flex justify-between mt-4 text-left"><span class="font-black text-primary uppercase">Year Total</span><span class="font-black text-primary text-2xl italic">¥${totalYear.toLocaleString()}</span></div>`;
     }
 
     async function fetchDetails(month, pass) {
@@ -260,7 +268,7 @@
             const data = await res.json();
             const list = document.getElementById('details-list');
             document.getElementById('details-title').textContent = month + " 詳細";
-            list.innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white">¥${d.price.toLocaleString()}</span></div>`).join('');
+            list.innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs text-left"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white tracking-widest">¥${d.price.toLocaleString()}</span></div>`).join('');
             document.getElementById('history-details').classList.remove('hidden');
         } catch (e) { alert("詳細取得エラー"); }
     }

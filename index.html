@@ -3,25 +3,20 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.31 Professional</title>
+    <title>美容室POS v1.32</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
     <script>
         tailwind.config = {
             darkMode: "class",
-            theme: {
-                extend: {
-                    colors: { "primary": "#ecc813", "secondary": "#f472b6", "background-dark": "#0f0a15", "neutral-dark": "#1e1629" },
-                    fontFamily: { "display": ["Manrope", "sans-serif"] }
-                }
-            }
+            theme: { extend: { colors: { "primary": "#ecc813", "secondary": "#f472b6", "background-dark": "#0f0a15", "neutral-dark": "#1e1629" } } }
         }
     </script>
     <style type="text/tailwindcss">
         .gold-gradient { background: linear-gradient(135deg, #ecc813 0%, #b3970f 100%); }
         .premium-border { border: 1px solid rgba(236, 200, 19, 0.3); }
-        .menu-item-active { @apply bg-secondary border-secondary text-background-dark; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
+        .menu-item-active { @apply bg-secondary border-secondary text-background-dark font-bold; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
     </style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
@@ -54,11 +49,11 @@
         <footer class="fixed bottom-0 left-0 right-0 z-50 bg-neutral-dark/95 backdrop-blur-xl border-t border-primary/30 p-4 pb-8">
             <div class="max-w-md mx-auto space-y-4">
                 <div id="selected-list-area" class="hidden">
-                    <div class="flex items-center justify-between mb-2"><span class="text-[10px] font-bold text-secondary uppercase">選択内容</span><button onclick="resetSelection()" class="text-[10px] text-slate-400 border-b border-slate-600">リセット</button></div>
+                    <div class="flex items-center justify-between mb-2 px-1"><span class="text-[10px] font-bold text-secondary uppercase tracking-widest">選択内容</span><button onclick="resetSelection()" class="text-[10px] text-slate-400 border-b border-slate-600">リセット</button></div>
                     <div id="selected-tags-container" class="flex flex-wrap gap-2 max-h-20 overflow-y-auto"></div>
                 </div>
                 <div class="flex items-end justify-between px-2 pt-2 border-t border-white/5">
-                    <div class="flex flex-col"><span id="item-count" class="text-secondary text-[10px] font-bold uppercase">0点</span><span class="text-slate-200 text-sm font-bold">合計金額</span></div>
+                    <div class="flex flex-col"><span id="item-count" class="text-secondary text-[10px] font-bold uppercase tracking-widest">0点</span><span class="text-slate-200 text-sm font-bold">合計金額</span></div>
                     <div class="text-right"><span id="total-display" class="text-4xl font-black text-white tracking-tighter">¥ 0</span></div>
                 </div>
                 <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg active:scale-95 transition-all">売上を送信する</button>
@@ -72,41 +67,45 @@
             <h1 class="text-xl font-extrabold text-primary uppercase">設定</h1>
         </header>
         <main class="p-4 space-y-6 max-w-md mx-auto">
-            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4">
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4 shadow-xl">
                 <div><label class="text-[10px] font-bold text-primary uppercase">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-white" type="text"/></div>
                 <div><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-xs text-white" type="text"/></div>
-                <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl">変更を保存して反映</button>
+                <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl active:scale-95 transition-all shadow-lg">変更を保存して反映</button>
             </div>
             <div id="settings-menu-editor" class="space-y-6"></div>
-            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold">+ カテゴリー追加</button>
+            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold active:scale-95">+ カテゴリー追加</button>
         </main>
     </div>
 
-    <div id="history-screen" class="hidden min-h-screen bg-background-dark">
-        <header class="p-4 border-b border-secondary/20 flex items-center gap-3"><button onclick="switchScreen('main')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark border border-secondary/30"><span class="material-symbols-outlined text-secondary">arrow_back</span></button><h1 class="text-xl font-extrabold text-secondary">売上帳簿</h1></header>
-        <main id="history-summary" class="p-4 space-y-3 max-w-md mx-auto"></main>
+    <div id="history-screen" class="hidden min-h-screen bg-background-dark pb-10">
+        <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-secondary/20 px-6 py-4 flex items-center gap-3">
+            <button onclick="switchScreen('main')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark border border-secondary/30"><span class="material-symbols-outlined text-secondary">arrow_back</span></button>
+            <h1 class="text-xl font-extrabold text-secondary uppercase">売上帳簿</h1>
+        </header>
+        <main class="p-4 max-w-md mx-auto space-y-6">
+            <div id="history-summary" class="grid gap-3"></div>
+            <div id="history-details" class="hidden space-y-3 pt-6 border-t border-white/10">
+                <h3 id="details-title" class="text-sm font-bold text-primary px-2 uppercase tracking-widest"></h3>
+                <div id="details-list" class="grid gap-2"></div>
+            </div>
+        </main>
     </div>
 </div>
 
 <script>
     let state = {
         salonName: "Luxe Salon", gasUrl: "", selectedItems: [],
-        categories: [{ id: "cat1", title: "カット", subtitle: "CUT", items: [{ id: "i1", name: "ドライカット", price: 1800 }] }]
+        categories: [{ id: "cat1", title: "カット", items: [{ id: "i1", name: "ドライカット", price: 1800 }] }]
     };
 
     function init() {
         const saved = localStorage.getItem('salon_pos_final_data');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            state = { ...state, ...parsed, selectedItems: [] };
-        }
-        renderMain(); // 確実にメインを最初に描画
+        if (saved) state = { ...state, ...JSON.parse(saved), selectedItems: [] };
+        renderMain();
     }
 
     function switchScreen(screen) {
-        document.getElementById('main-screen').classList.add('hidden');
-        document.getElementById('settings-screen').classList.add('hidden');
-        document.getElementById('history-screen').classList.add('hidden');
+        ['main-screen', 'settings-screen', 'history-screen'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById(screen + '-screen').classList.remove('hidden');
         if (screen === 'main') renderMain();
         if (screen === 'settings') renderSettings();
@@ -117,11 +116,11 @@
         const container = document.getElementById('menu-container');
         container.innerHTML = state.categories.map(cat => `
             <div class="space-y-4">
-                <div class="px-2"><h2 class="text-lg font-bold">${cat.title}</h2><p class="text-[10px] text-slate-500 uppercase">${cat.subtitle || ''}</p></div>
+                <div class="px-2 border-l-4 border-secondary ml-1"><h2 class="text-lg font-bold leading-none">${cat.title}</h2></div>
                 <div class="grid gap-3">
                     ${cat.items.map(item => `
                         <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="flex justify-between p-4 rounded-xl border transition-all ${state.selectedItems.some(si => si.id === item.id) ? 'menu-item-active' : 'bg-neutral-dark premium-border'}">
-                            <span class="font-bold">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
+                            <span>${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -135,22 +134,20 @@
         document.getElementById('gas-url-input').value = state.gasUrl;
         const editor = document.getElementById('settings-menu-editor');
         editor.innerHTML = state.categories.map((cat, cIdx) => `
-            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative">
-                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 text-xs">消去</button>
-                <div class="grid gap-2">
+            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative shadow-lg">
+                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 font-bold text-xs uppercase">消去</button>
+                <div class="grid gap-1">
                     <label class="text-[9px] font-bold text-slate-500 uppercase">カテゴリー名</label>
-                    <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white" value="${cat.title}" />
-                    <label class="text-[9px] font-bold text-slate-500 uppercase">サブタイトル</label>
-                    <input oninput="state.categories[${cIdx}].subtitle = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400" value="${cat.subtitle || ''}" />
+                    <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold" value="${cat.title}" />
                 </div>
-                <div class="space-y-3">
+                <div class="space-y-3 pt-2">
                     ${cat.items.map((item, iIdx) => `
                         <div class="flex gap-2">
                             <input oninput="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="flex-1 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" value="${item.name}" />
                             <input oninput="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-20 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" type="number" value="${item.price}" />
                         </div>
                     `).join('')}
-                    <button onclick="addItem(${cIdx})" class="w-full py-2 bg-white/5 rounded text-[10px]">+ 項目追加</button>
+                    <button onclick="addItem(${cIdx})" class="w-full py-2 bg-white/5 rounded text-[10px] text-slate-400">+ 項目追加</button>
                 </div>
             </div>
         `).join('');
@@ -171,21 +168,21 @@
         const container = document.getElementById('selected-tags-container');
         if (state.selectedItems.length > 0) {
             area.classList.remove('hidden');
-            container.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/20 border border-secondary/40 text-secondary text-[10px] rounded-full">${item.name}</span>`).join('');
+            container.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] rounded-full font-bold">・${item.name}</span>`).join('');
         } else { area.classList.add('hidden'); }
     }
 
     function resetSelection() { state.selectedItems = []; renderMain(); }
     function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; }
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i"+Date.now(), name: "新メニュー", price: 0 }); renderSettings(); }
-    function addNewCategory() { state.categories.push({ id: "c"+Date.now(), title: "新カテゴリー", subtitle: "", items: [] }); renderSettings(); }
-    function deleteCategory(idx) { if(confirm('消去しますか？')){ state.categories.splice(idx, 1); renderSettings(); } }
+    function addNewCategory() { state.categories.push({ id: "c"+Date.now(), title: "新カテゴリー", items: [] }); renderSettings(); }
+    function deleteCategory(idx) { if(confirm('このカテゴリーを消去しますか？')){ state.categories.splice(idx, 1); renderSettings(); } }
     
     function saveAllSettings() {
         state.salonName = document.getElementById('salon-name-input').value;
         state.gasUrl = document.getElementById('gas-url-input').value;
         localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-        alert("保存しました");
+        alert("設定を保存しました");
         switchScreen('main');
     }
 
@@ -200,9 +197,46 @@
     }
 
     async function sendSalesData() {
-        if (!state.selectedItems.length || !state.gasUrl) return alert("URL未設定です");
+        if (!state.selectedItems.length || !state.gasUrl) return alert("項目未選択/URL未設定");
         const payload = { timestamp: new Date().toLocaleString('ja-JP'), items: state.selectedItems.map(i => i.name).join(','), total: state.selectedItems.reduce((s,i)=>s+i.price,0) };
-        try { await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); alert("送信完了"); resetSelection(); } catch(e) { alert("エラー"); }
+        try { await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); alert("売上を送信しました！"); resetSelection(); } catch(e) { alert("送信エラー"); }
+    }
+
+    async function openHistoryWithAuth() {
+        if (!state.gasUrl) return alert("先にURLを設定してください");
+        const pass = prompt("履歴閲覧パスワードを入力");
+        if (!pass) return;
+        try {
+            const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: pass }) });
+            const data = await res.json();
+            if (data.error) return alert(data.error);
+            renderHistory(data.summary, pass);
+            switchScreen('history');
+        } catch (e) { alert("通信エラーが発生しました"); }
+    }
+
+    function renderHistory(summary, pass) {
+        const container = document.getElementById('history-summary');
+        const months = Object.keys(summary).sort().reverse();
+        let totalYear = 0;
+        container.innerHTML = months.map(m => {
+            totalYear += summary[m];
+            return `<button onclick="fetchDetails('${m}', '${pass}')" class="flex justify-between p-5 bg-neutral-dark rounded-xl border border-white/5 active:scale-95 shadow-xl">
+                <span class="font-bold text-slate-300">${m}</span>
+                <span class="font-bold text-secondary text-lg">¥${summary[m].toLocaleString()}</span>
+            </button>`;
+        }).join('') + `<div class="p-5 bg-primary/10 border-2 border-primary/30 rounded-xl flex justify-between mt-4"><span class="font-black text-primary uppercase">Year Total</span><span class="font-black text-primary text-2xl">¥${totalYear.toLocaleString()}</span></div>`;
+    }
+
+    async function fetchDetails(month, pass) {
+        try {
+            const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: pass, month: month }) });
+            const data = await res.json();
+            const list = document.getElementById('details-list');
+            document.getElementById('details-title').textContent = month + " の詳細";
+            list.innerHTML = data.details.map(d => `<div class="flex justify-between p-3 bg-neutral-dark/50 border border-white/5 rounded-lg text-xs"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white">¥${d.price.toLocaleString()}</span></div>`).join('');
+            document.getElementById('history-details').classList.remove('hidden');
+        } catch (e) { alert("詳細取得失敗"); }
     }
 
     init();

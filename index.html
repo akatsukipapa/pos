@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.43</title>
+    <title>美容室POS v1.44</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
@@ -17,7 +17,6 @@
         .gold-gradient { background: linear-gradient(135deg, #ecc813 0%, #b3970f 100%); }
         .premium-border { border: 1px solid rgba(236, 200, 19, 0.3); }
         .menu-item-active { @apply bg-secondary border-secondary text-background-dark font-bold; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     </style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
@@ -39,7 +38,7 @@
             <div id="menu-container" class="space-y-8"></div>
             <section class="space-y-4 pt-4 border-t border-white/10">
                 <h3 class="text-[10px] font-bold text-slate-500 uppercase px-2">手入力項目</h3>
-                <div class="bg-neutral-dark p-6 rounded-2xl premium-border space-y-4 shadow-xl">
+                <div class="bg-neutral-dark p-6 rounded-2xl premium-border space-y-4 shadow-xl text-left">
                     <input id="custom-name" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-3 outline-none text-white focus:border-secondary" placeholder="項目名" type="text"/>
                     <input id="custom-price" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-3 outline-none text-white focus:border-secondary" placeholder="金額" type="number"/>
                     <button onclick="addCustomItem()" class="w-full py-3 bg-secondary/10 text-secondary border border-secondary/30 rounded-lg font-bold active:scale-95">追加</button>
@@ -59,7 +58,7 @@
                 </div>
                 <div class="flex flex-col items-center gap-2">
                     <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg active:scale-95 shadow-lg">売上を送信する</button>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.43 Stable</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.44 Stable</span>
                 </div>
             </div>
         </footer>
@@ -93,9 +92,12 @@
             <h1 class="text-xl font-extrabold text-primary uppercase">設定</h1>
         </header>
         <main class="p-4 space-y-6 max-w-md mx-auto">
-            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4 shadow-xl">
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4 shadow-xl text-left">
                 <div><label class="text-[10px] font-bold text-primary uppercase">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-white" type="text"/></div>
-                <div><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-xs text-white" type="text"/></div>
+                <div>
+                    <div class="flex justify-between items-center"><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><button onclick="clearGasUrl()" class="text-[9px] text-red-400 font-bold uppercase tracking-tighter underline">クリア</button></div>
+                    <input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-xs text-white" type="text"/>
+                </div>
                 <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl active:scale-95 shadow-lg">変更を保存</button>
             </div>
             <div id="settings-menu-editor" class="space-y-6"></div>
@@ -105,7 +107,7 @@
 </div>
 
 <script>
-    const VERSION = "v1.43";
+    const VERSION = "v1.44";
     let lastPass = ""; 
 
     const DEFAULT_STATE = {
@@ -165,7 +167,8 @@
         const container = document.getElementById('selected-tags-container');
         if (state.selectedItems.length > 0) {
             area.classList.remove('hidden');
-            container.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] rounded-full font-bold">・${item.name}</span>`).join('');
+            // 手入力項目も含め、金額付きで表示するように修正
+            container.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] rounded-full font-bold">・${item.name} (¥${item.price.toLocaleString()})</span>`).join('');
         } else { area.classList.add('hidden'); }
     }
 
@@ -251,6 +254,7 @@
         `).join('');
     }
 
+    function clearGasUrl() { if(confirm('URLをクリアしますか？')) { document.getElementById('gas-url-input').value = ''; } }
     function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; }
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i"+Date.now(), name: "新メニュー", price: 0 }); renderSettings(); }
     function addNewCategory() { state.categories.push({ id: "c"+Date.now(), title: "新カテゴリー", items: [] }); renderSettings(); }
@@ -261,7 +265,7 @@
         state.gasUrl = document.getElementById('gas-url-input').value;
         state.version = VERSION;
         localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-        alert("設定を保存しました (v1.43)");
+        alert("設定を保存しました (v1.44)");
         switchScreen('main');
     }
 

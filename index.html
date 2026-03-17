@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.44</title>
+    <title>美容室POS v1.45</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
@@ -22,6 +22,15 @@
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
 
 <div id="app">
+    <div id="lock-screen" class="fixed inset-0 z-[100] bg-background-dark flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-xs space-y-6 text-center">
+            <span class="material-symbols-outlined text-primary text-6xl">lock</span>
+            <h2 class="text-xl font-black text-primary uppercase tracking-widest">Login Required</h2>
+            <input id="app-password" type="password" placeholder="パスワードを入力" class="w-full bg-neutral-dark border border-white/10 rounded-xl px-4 py-4 text-center text-white outline-none focus:border-primary" />
+            <button onclick="checkAppLock()" class="w-full py-4 gold-gradient rounded-xl text-background-dark font-bold active:scale-95">ロック解除</button>
+        </div>
+    </div>
+
     <div id="main-screen">
         <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -58,7 +67,7 @@
                 </div>
                 <div class="flex flex-col items-center gap-2">
                     <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg active:scale-95 shadow-lg">売上を送信する</button>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.44 Stable</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.45 Secure</span>
                 </div>
             </div>
         </footer>
@@ -71,18 +80,12 @@
         </header>
         <main class="p-4 max-w-md mx-auto space-y-6">
             <div class="bg-neutral-dark p-4 rounded-xl border border-white/5">
-                <label class="text-[9px] font-bold text-secondary uppercase block mb-1">表示年度を選択</label>
                 <select id="year-selector" onchange="refreshHistory()" class="w-full bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold outline-none">
-                    <option value="2025">2025年度</option>
-                    <option value="2026" selected>2026年度</option>
-                    <option value="2027">2027年度</option>
+                    <option value="2025">2025年度</option><option value="2026" selected>2026年度</option><option value="2027">2027年度</option>
                 </select>
             </div>
             <div id="history-summary" class="grid gap-3"></div>
-            <div id="history-details" class="hidden space-y-3 pt-6 border-t border-white/10">
-                <h3 id="details-title" class="text-sm font-bold text-primary px-2 uppercase tracking-widest"></h3>
-                <div id="details-list" class="grid gap-2"></div>
-            </div>
+            <div id="history-details" class="hidden space-y-3 pt-6 border-t border-white/10"><h3 id="details-title" class="text-sm font-bold text-primary px-2"></h3><div id="details-list" class="grid gap-2"></div></div>
         </main>
     </div>
 
@@ -92,22 +95,19 @@
             <h1 class="text-xl font-extrabold text-primary uppercase">設定</h1>
         </header>
         <main class="p-4 space-y-6 max-w-md mx-auto">
-            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4 shadow-xl text-left">
-                <div><label class="text-[10px] font-bold text-primary uppercase">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-white" type="text"/></div>
-                <div>
-                    <div class="flex justify-between items-center"><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><button onclick="clearGasUrl()" class="text-[9px] text-red-400 font-bold uppercase tracking-tighter underline">クリア</button></div>
-                    <input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-xs text-white" type="text"/>
-                </div>
-                <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl active:scale-95 shadow-lg">変更を保存</button>
+            <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4">
+                <div><label class="text-[10px] font-bold text-primary">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-white" /></div>
+                <div><div class="flex justify-between items-center"><label class="text-[10px] font-bold text-primary">GAS URL</label><button onclick="clearGasUrl()" class="text-[9px] text-red-400 underline">クリア</button></div><input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 mt-1 text-xs text-white" /></div>
+                <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl active:scale-95">変更を保存</button>
             </div>
             <div id="settings-menu-editor" class="space-y-6"></div>
-            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold active:scale-95">+ カテゴリー追加</button>
+            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-primary/30 rounded-xl text-primary font-bold">+ カテゴリー追加</button>
         </main>
     </div>
 </div>
 
 <script>
-    const VERSION = "v1.44";
+    const VERSION = "v1.45";
     let lastPass = ""; 
 
     const DEFAULT_STATE = {
@@ -126,12 +126,39 @@
         const saved = localStorage.getItem('salon_pos_final_data');
         if (saved) {
             const parsed = JSON.parse(saved);
-            if (parsed.version !== VERSION) {
-                state = { ...DEFAULT_STATE, gasUrl: parsed.gasUrl || "", salonName: parsed.salonName || "Luxe Salon" };
-                localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-            } else { state = { ...state, ...parsed, selectedItems: [] }; }
+            state = { ...state, ...parsed, selectedItems: [] };
         }
-        renderMain();
+        
+        // セッションチェック（当日の日付が保存されていればパスワードをスキップ）
+        const today = new Date().toLocaleDateString();
+        const lastAuth = localStorage.getItem('last_auth_date');
+        lastPass = localStorage.getItem('cached_pass') || "";
+
+        if (lastAuth === today && lastPass) {
+            renderMain();
+        } else {
+            document.getElementById('lock-screen').classList.remove('hidden');
+        }
+    }
+
+    async function checkAppLock() {
+        const pass = document.getElementById('app-password').value;
+        if (!pass) return;
+        if (!state.gasUrl) return alert("URL未設定。設定画面へは入れません。");
+
+        try {
+            // パスワードが合っているかGASに一度問い合わせる
+            const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: pass, year: new Date().getFullYear().toString() }) });
+            const data = await res.json();
+            if (data.error) return alert("パスワードが違います");
+
+            // 成功したらセッション保存
+            lastPass = pass;
+            localStorage.setItem('cached_pass', pass);
+            localStorage.setItem('last_auth_date', new Date().toLocaleDateString());
+            document.getElementById('lock-screen').classList.add('hidden');
+            renderMain();
+        } catch (e) { alert("認証エラー。GAS URLを確認してください。"); }
     }
 
     function renderMain() {
@@ -167,7 +194,6 @@
         const container = document.getElementById('selected-tags-container');
         if (state.selectedItems.length > 0) {
             area.classList.remove('hidden');
-            // 手入力項目も含め、金額付きで表示するように修正
             container.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] rounded-full font-bold">・${item.name} (¥${item.price.toLocaleString()})</span>`).join('');
         } else { area.classList.add('hidden'); }
     }
@@ -180,11 +206,8 @@
         try { await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); alert("売上を送信しました"); resetSelection(); } catch(e) { alert("送信エラー"); }
     }
 
-    async function openHistoryWithAuth() {
-        if (!state.gasUrl) return alert("URLを設定してください");
-        const pass = prompt("履歴パスワード");
-        if (!pass) return;
-        lastPass = pass;
+    function openHistoryWithAuth() {
+        // ロック解除済みのパスワードを使い回すのでpromptは不要
         refreshHistory();
     }
 
@@ -196,7 +219,7 @@
             if (data.error) return alert(data.error);
             renderHistory(data.summary, lastPass);
             switchScreen('history');
-        } catch (e) { alert("通信エラー"); }
+        } catch (e) { alert("履歴取得失敗"); }
     }
 
     function renderHistory(summary, pass) {
@@ -206,8 +229,7 @@
         container.innerHTML = months.map(m => {
             totalYear += summary[m];
             return `<button onclick="fetchDetails('${m}', '${pass}')" class="flex justify-between p-5 bg-neutral-dark rounded-xl border border-white/5 active:scale-95 shadow-xl text-left">
-                <span class="font-bold text-slate-300">${m}</span>
-                <span class="font-bold text-secondary text-lg">¥${summary[m].toLocaleString()}</span>
+                <span class="font-bold text-slate-300">${m}</span><span class="font-bold text-secondary text-lg">¥${summary[m].toLocaleString()}</span>
             </button>`;
         }).join('') + `<div class="p-5 bg-primary/10 border-2 border-primary/30 rounded-xl flex justify-between mt-4 text-left"><span class="font-black text-primary uppercase">Year Total</span><span class="font-black text-primary text-2xl italic">¥${totalYear.toLocaleString()}</span></div>`;
     }
@@ -220,7 +242,7 @@
             document.getElementById('details-title').textContent = month + " 詳細";
             list.innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs text-left"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white tracking-widest">¥${d.price.toLocaleString()}</span></div>`).join('');
             document.getElementById('history-details').classList.remove('hidden');
-        } catch (e) { alert("詳細取得エラー"); }
+        } catch (e) { alert("詳細エラー"); }
     }
 
     function switchScreen(screen) {
@@ -236,18 +258,15 @@
         const editor = document.getElementById('settings-menu-editor');
         editor.innerHTML = state.categories.map((cat, cIdx) => `
             <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative shadow-lg text-left">
-                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 font-bold text-xs uppercase">消去</button>
-                <div class="grid gap-1">
-                    <label class="text-[9px] font-bold text-slate-500 uppercase">カテゴリー名</label>
-                    <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold" value="${cat.title}" />
-                </div>
+                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 font-bold text-xs">消去</button>
+                <div class="grid gap-1"><label class="text-[9px] font-bold text-slate-500">カテゴリー名</label>
+                <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold" value="${cat.title}" /></div>
                 <div class="space-y-3 pt-2">
                     ${cat.items.map((item, iIdx) => `
                         <div class="flex gap-2">
                             <input oninput="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="flex-1 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" value="${item.name}" />
                             <input oninput="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-24 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2 font-mono" type="number" value="${item.price}" />
-                        </div>
-                    `).join('')}
+                        </div>`).join('')}
                     <button onclick="addItem(${cIdx})" class="w-full py-2 bg-white/5 rounded text-[10px] text-slate-400">+ 項目追加</button>
                 </div>
             </div>
@@ -265,7 +284,7 @@
         state.gasUrl = document.getElementById('gas-url-input').value;
         state.version = VERSION;
         localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-        alert("設定を保存しました (v1.44)");
+        alert("設定を保存しました");
         switchScreen('main');
     }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.46</title>
+    <title>美容室POS v1.50 Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
@@ -22,6 +22,19 @@
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
 
 <div id="app">
+    <div id="setup-screen" class="fixed inset-0 z-[110] bg-background-dark flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm space-y-6 text-center">
+            <span class="material-symbols-outlined text-primary text-6xl">settings_suggest</span>
+            <h2 class="text-xl font-black text-primary uppercase tracking-widest">Initial Setup</h2>
+            <p class="text-xs text-slate-400 leading-relaxed">GAS URLを貼り付け、ログイン用の<br>新しいパスワードを決めてください。</p>
+            <div class="space-y-4">
+                <input id="setup-gas-url" type="text" placeholder="GAS ウェブアプリURL" class="w-full bg-neutral-dark border border-white/10 rounded-xl px-4 py-4 text-sm text-white outline-none focus:border-primary" />
+                <input id="setup-password" type="password" placeholder="新しいパスワード" class="w-full bg-neutral-dark border border-white/10 rounded-xl px-4 py-4 text-center text-white outline-none focus:border-primary" />
+            </div>
+            <button onclick="runInitialSetup()" class="w-full py-4 gold-gradient rounded-xl text-background-dark font-bold active:scale-95 shadow-lg">設定を完了して開始</button>
+        </div>
+    </div>
+
     <div id="lock-screen" class="fixed inset-0 z-[100] bg-background-dark flex items-center justify-center p-6 hidden">
         <div class="w-full max-w-xs space-y-6 text-center">
             <span class="material-symbols-outlined text-primary text-6xl">lock</span>
@@ -35,10 +48,10 @@
         <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-3xl">fluid</span>
-                <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase" id="display-salon-name">Luxe Salon</h1>
+                <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase" id="display-salon-name italic">Luxe Salon</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="logout()" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10 border border-red-500/30 active:scale-90" title="ロックアウト">
+                <button onclick="logout()" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10 border border-red-500/30 active:scale-90" title="クイックロック">
                     <span class="material-symbols-outlined text-red-400 text-xl">logout</span>
                 </button>
                 <button onclick="openHistoryWithAuth()" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark border border-secondary/30 active:scale-90">
@@ -74,7 +87,7 @@
                 </div>
                 <div class="flex flex-col items-center gap-2">
                     <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg active:scale-95 shadow-lg">売上を送信する</button>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.46 Final Secure</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.50 Secure Deploy</span>
                 </div>
             </div>
         </footer>
@@ -114,16 +127,38 @@
 </div>
 
 <script>
-    const VERSION = "v1.46";
+    const VERSION = "v1.50";
     let lastPass = ""; 
 
     const DEFAULT_STATE = {
         version: VERSION,
         salonName: "Luxe Salon", gasUrl: "", selectedItems: [],
         categories: [
-            { id: "c1", title: "カット", items: [{ id: "i1", name: "ドライカット", price: 1800 }, { id: "i2", name: "カット", price: 1500 }, { id: "i3", name: "前髪カット", price: 500 }]},
-            { id: "c2", title: "パーマ", items: [{ id: "i4", name: "部分パーマ", price: 4500 }, { id: "i5", name: "パーマ", price: 6500 }, { id: "i6", name: "デジタルパーマ", price: 9500 }]},
-            { id: "c3", title: "カラー", items: [{ id: "i7", name: "カラー", price: 5500 }, { id: "i8", name: "メテオカラー", price: 8500 }]}
+            { id: "c1", title: "カット", items: [
+                { id: "i1", name: "ドライカット", price: 1800 }, 
+                { id: "i2", name: "カット", price: 2700 }, 
+                { id: "i3", name: "前髪カット", price: 500 }
+            ]},
+            { id: "c2", title: "パーマ", items: [
+                { id: "i4", name: "部分パーマ", price: 3500 }, 
+                { id: "i5", name: "パーマ", price: 5500 }, 
+                { id: "i6", name: "クリームパーマ", price: 6500 },
+                { id: "i7", name: "クリープパーマ", price: 7500 },
+                { id: "i8", name: "デジタルパーマ", price: 9500 }
+            ]},
+            { id: "c3", title: "カラー", items: [
+                { id: "i9", name: "グレイカラーリタッチ", price: 3500 }, 
+                { id: "i10", name: "グレイカラー", price: 4000 },
+                { id: "i11", name: "カラーリタッチ", price: 4500 },
+                { id: "i12", name: "カラー", price: 5000 },
+                { id: "i13", name: "トリートメントカラー", price: 7700 },
+                { id: "i14", name: "メテオカラー", price: 8800 }
+            ]},
+            { id: "c4", title: "ストレート", items: [
+                { id: "i15", name: "縮毛矯正", price: 13000 },
+                { id: "i16", name: "前髪のみ", price: 3000 },
+                { id: "i17", name: "前髪サイド", price: 5000 }
+            ]}
         ]
     };
 
@@ -136,6 +171,12 @@
             state = { ...state, ...parsed, selectedItems: [] };
         }
         
+        // URLがない場合はセットアップ画面へ
+        if (!state.gasUrl) {
+            document.getElementById('setup-screen').classList.remove('hidden');
+            return;
+        }
+
         const today = new Date().toLocaleDateString();
         const lastAuth = localStorage.getItem('last_auth_date');
         lastPass = localStorage.getItem('cached_pass') || "";
@@ -147,10 +188,38 @@
         }
     }
 
+    async function runInitialSetup() {
+        const url = document.getElementById('setup-gas-url').value;
+        const pass = document.getElementById('setup-password').value;
+        if (!url || !pass) return alert("URLとパスワードを入力してください");
+
+        try {
+            const res = await fetch(url, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'updatePassword', newPassword: pass }) 
+            });
+            const text = await res.text();
+            
+            if (text.includes("Password Updated") || text.includes("Success")) {
+                state.gasUrl = url;
+                lastPass = pass;
+                localStorage.setItem('cached_pass', pass);
+                localStorage.setItem('last_auth_date', new Date().toLocaleDateString());
+                saveAllSettings(true); // サイレント保存
+                document.getElementById('setup-screen').classList.add('hidden');
+                renderMain();
+                alert("セットアップ完了！原本シートとパスワードが作成されました。");
+            } else {
+                alert("GASからの応答が不正です。URLを確認してください。");
+            }
+        } catch (e) {
+            alert("接続エラー。GASのデプロイ設定（アクセス権: 全員）を確認してください。");
+        }
+    }
+
     async function checkAppLock() {
         const pass = document.getElementById('app-password').value;
         if (!pass) return;
-        if (!state.gasUrl) return alert("URL未設定。設定画面へは入れません。");
 
         try {
             const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: pass, year: new Date().getFullYear().toString() }) });
@@ -166,7 +235,7 @@
     }
 
     function logout() {
-        if(confirm('ログアウトしてロック画面に戻りますか？')) {
+        if(confirm('ログアウト（クイックロック）しますか？')) {
             localStorage.removeItem('cached_pass');
             localStorage.removeItem('last_auth_date');
             location.reload(); 
@@ -215,7 +284,11 @@
     async function sendSalesData() {
         if (!state.selectedItems.length || !state.gasUrl) return alert("URL未設定/項目未選択");
         const payload = { timestamp: new Date().toLocaleString('ja-JP'), items: state.selectedItems.map(i => i.name).join(','), total: state.selectedItems.reduce((s,i)=>s+i.price,0) };
-        try { await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); alert("売上を送信しました"); resetSelection(); } catch(e) { alert("送信エラー"); }
+        try { 
+            await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); 
+            alert("売上を送信しました"); 
+            resetSelection(); 
+        } catch(e) { alert("送信エラー"); }
     }
 
     function openHistoryWithAuth() { refreshHistory(); }
@@ -282,19 +355,20 @@
         `).join('');
     }
 
-    function clearGasUrl() { if(confirm('URLをクリアしますか？')) { document.getElementById('gas-url-input').value = ''; } }
+    function clearGasUrl() { if(confirm('URLをクリアしますか？設定がリセットされます。')) { localStorage.clear(); location.reload(); } }
     function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; }
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i"+Date.now(), name: "新メニュー", price: 0 }); renderSettings(); }
     function addNewCategory() { state.categories.push({ id: "c"+Date.now(), title: "新カテゴリー", items: [] }); renderSettings(); }
     function deleteCategory(idx) { if(confirm('消去しますか？')){ state.categories.splice(idx, 1); renderSettings(); } }
     
-    function saveAllSettings() {
-        state.salonName = document.getElementById('salon-name-input').value;
-        state.gasUrl = document.getElementById('gas-url-input').value;
+    function saveAllSettings(silent = false) {
+        if (!silent) {
+            state.salonName = document.getElementById('salon-name-input').value;
+            state.gasUrl = document.getElementById('gas-url-input').value;
+        }
         state.version = VERSION;
         localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-        alert("設定を保存しました");
-        switchScreen('main');
+        if (!silent) { alert("設定を保存しました"); switchScreen('main'); }
     }
 
     function addCustomItem() {

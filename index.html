@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-    <title>美容室POS v1.53 Stable</title>
+    <title>美容室POS v1.54 Stable-UI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
@@ -18,6 +18,8 @@
         .premium-border { border: 1px solid rgba(236, 200, 19, 0.3); }
         .menu-item-active { @apply bg-secondary border-secondary text-background-dark font-bold; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
         .clock-font { font-family: 'Manrope', sans-serif; letter-spacing: -0.05em; }
+        /* スクロールバーを隠す（iOS/Chrome用） */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
@@ -65,50 +67,17 @@
             </div>
         </section>
 
-        <main id="menu-container" class="p-4 space-y-8 max-w-md mx-auto pb-96 text-left"></main>
+        <main id="menu-container" class="p-4 space-y-8 max-w-md mx-auto pb-48 text-left"></main>
 
         <footer class="fixed bottom-0 left-0 right-0 z-50 bg-neutral-dark/95 backdrop-blur-xl border-t border-primary/30 p-4 pb-8">
-            <div class="max-w-md mx-auto space-y-4 text-left">
-                <div id="selected-list-area" class="hidden bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[10px] font-bold text-secondary uppercase italic">Review Items</span>
-                        <button onclick="resetSelection()" class="text-[9px] text-slate-500 underline">全解除</button>
-                    </div>
-                    <div id="selected-items-list" class="space-y-2 max-h-32 overflow-y-auto pr-1"></div>
+            <div class="max-w-md mx-auto flex items-center justify-between px-2">
+                <div class="flex flex-col">
+                    <span id="item-count" class="text-secondary text-[10px] font-bold uppercase">0 items</span>
+                    <span id="total-display" class="text-4xl font-black text-white italic tracking-tighter">¥ 0</span>
                 </div>
-
-                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-3">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase italic">Manual Entry</span>
-                    <div class="flex gap-2">
-                        <input id="custom-name" type="text" placeholder="項目名" class="flex-1 bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-xs text-white" />
-                        <input id="custom-price" type="number" placeholder="金額" class="w-24 bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-xs text-white" />
-                        <button onclick="addCustomItem()" class="px-4 py-2 bg-secondary/20 border border-secondary/40 text-secondary text-xs font-bold rounded-lg">追加</button>
-                    </div>
-                </div>
-
-                <div class="flex items-end justify-between border-t border-white/5 pt-2">
-                    <div class="flex flex-col"><span id="item-count" class="text-secondary text-[10px] font-bold uppercase">0 items</span><span class="text-slate-200 text-sm font-bold">合計金額</span></div>
-                    <span id="total-display" class="text-4xl font-black text-white italic">¥ 0</span>
-                </div>
-                <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg shadow-lg active:scale-95">売上を送信する</button>
+                <button onclick="sendSalesData()" class="px-10 py-4 gold-gradient rounded-2xl text-background-dark font-black text-lg shadow-lg active:scale-95">売上を送信</button>
             </div>
         </footer>
-    </div>
-
-    <div id="settings-screen" class="hidden min-h-screen bg-background-dark pb-20">
-        <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center gap-3">
-            <button onclick="switchScreen('main')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark premium-border"><span class="material-symbols-outlined text-primary">arrow_back</span></button>
-            <h1 class="text-xl font-extrabold text-primary uppercase">Settings</h1>
-        </header>
-        <main class="p-4 space-y-6 max-w-md mx-auto text-left">
-            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4">
-                <div><label class="text-[10px] font-bold text-primary uppercase">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-2 text-white mt-1" /></div>
-                <div><label class="text-[10px] font-bold text-primary uppercase italic">GAS URL</label><div class="flex gap-2"><input id="gas-url-input" class="flex-1 bg-background-dark border border-white/10 rounded-lg px-4 py-2 text-xs text-white" /><button onclick="clearGasUrl()" class="text-red-400 text-[10px] font-bold underline">RESET</button></div></div>
-                <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl">設定を保存</button>
-            </div>
-            <div id="settings-menu-editor" class="space-y-6"></div>
-            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-white/10 rounded-2xl text-slate-500 font-bold">+ カテゴリーを追加</button>
-        </main>
     </div>
 
     <div id="history-screen" class="hidden min-h-screen bg-background-dark pb-10">
@@ -126,10 +95,26 @@
             <div id="history-details" class="hidden space-y-3 pt-6 border-t border-white/10"><h3 id="details-title" class="text-sm font-bold text-primary px-2 uppercase italic"></h3><div id="details-list" class="grid gap-2"></div></div>
         </main>
     </div>
+
+    <div id="settings-screen" class="hidden min-h-screen bg-background-dark pb-20">
+        <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center gap-3">
+            <button onclick="switchScreen('main')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark premium-border"><span class="material-symbols-outlined text-primary">arrow_back</span></button>
+            <h1 class="text-xl font-extrabold text-primary uppercase">Settings</h1>
+        </header>
+        <main class="p-4 space-y-6 max-w-md mx-auto text-left">
+            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4">
+                <div><label class="text-[10px] font-bold text-primary uppercase italic">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-2 text-white mt-1" /></div>
+                <div><label class="text-[10px] font-bold text-primary uppercase italic">GAS URL</label><div class="flex gap-2"><input id="gas-url-input" class="flex-1 bg-background-dark border border-white/10 rounded-lg px-4 py-2 text-xs text-white outline-none" /><button onclick="clearGasUrl()" class="text-red-400 text-[10px] font-bold underline italic">RESET</button></div></div>
+                <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl shadow-md">設定を保存</button>
+            </div>
+            <div id="settings-menu-editor" class="space-y-6"></div>
+            <button onclick="addNewCategory()" class="w-full py-4 border-2 border-dashed border-white/10 rounded-2xl text-slate-500 font-bold">+ カテゴリーを追加</button>
+        </main>
+    </div>
 </div>
 
 <script>
-    const VERSION = "v1.53 Stable";
+    const VERSION = "v1.54 Stable";
     let lastPass = ""; 
     let state = { version: VERSION, salonName: "Luxe Salon", gasUrl: "", selectedItems: [], categories: [] };
 
@@ -162,18 +147,45 @@
         document.getElementById('display-day-time').textContent = `(${days[now.getDay()]}) ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
     }
 
+    // メイン描画（メニュー + 末尾に明細と手入力欄）
     function renderMain() {
         document.getElementById('display-salon-name').textContent = state.salonName;
         const container = document.getElementById('menu-container');
-        container.innerHTML = state.categories.map(cat => `
+        
+        let html = state.categories.map(cat => `
             <div class="space-y-4">
-                <div class="px-2 border-l-4 border-secondary ml-1 font-bold text-slate-300 uppercase text-sm">${cat.title}</div>
+                <div class="px-2 border-l-4 border-secondary ml-1 font-bold text-slate-300 uppercase text-sm tracking-widest">${cat.title}</div>
                 <div class="grid gap-3">${cat.items.map(item => `
                     <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="flex justify-between items-center p-5 rounded-2xl border transition-all ${state.selectedItems.some(si => si.id === item.id) ? 'menu-item-active' : 'bg-neutral-dark premium-border'}">
-                        <span class="text-sm">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
+                        <span class="text-sm font-medium tracking-wide">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
                     </button>`).join('')}
                 </div>
             </div>`).join('');
+
+        // メニューの最後に明細と手入力欄を追加
+        html += `
+            <div class="mt-16 pb-32 space-y-6">
+                <div id="selected-list-area" class="hidden bg-white/5 rounded-3xl p-6 border border-white/10 shadow-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-bold text-secondary uppercase italic tracking-widest">Selected Receipt</span>
+                        <button onclick="resetSelection()" class="text-[9px] text-slate-500 underline">全解除</button>
+                    </div>
+                    <div id="selected-items-list" class="space-y-3 pr-1"></div>
+                </div>
+
+                <div class="bg-neutral-dark p-6 rounded-3xl border border-white/5 space-y-4 shadow-xl">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase italic tracking-widest block border-b border-white/5 pb-2">Manual Entry</span>
+                    <div class="space-y-3">
+                        <input id="custom-name" type="text" placeholder="項目名" class="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-secondary" />
+                        <div class="flex gap-2">
+                            <input id="custom-price" type="number" placeholder="金額" class="flex-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-secondary" />
+                            <button onclick="addCustomItem()" class="px-8 py-3 bg-secondary/10 border border-secondary/30 text-secondary font-bold rounded-xl active:scale-95">追加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+        container.innerHTML = html;
         updateSummary();
     }
 
@@ -184,7 +196,6 @@
         renderMain();
     }
 
-    // 明細（レシート風）表示の更新
     function updateSummary() {
         const total = state.selectedItems.reduce((s, i) => s + i.price, 0);
         document.getElementById('total-display').textContent = `¥ ${total.toLocaleString()}`;
@@ -196,10 +207,13 @@
         if (state.selectedItems.length > 0) {
             area.classList.remove('hidden');
             list.innerHTML = state.selectedItems.map((item, index) => `
-                <div class="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                    <span class="font-bold text-slate-200 truncate pr-4">${item.name}</span>
+                <div class="flex justify-between items-center text-sm border-b border-white/5 pb-3 last:border-0">
+                    <div class="flex items-center gap-2 pr-4">
+                        <span class="text-secondary text-[8px]">●</span>
+                        <span class="font-bold text-slate-200">${item.name}</span>
+                    </div>
                     <div class="flex items-center gap-3 shrink-0">
-                        <span class="font-mono text-white">¥${item.price.toLocaleString()}</span>
+                        <span class="font-mono text-white font-bold">¥${item.price.toLocaleString()}</span>
                         <button onclick="removeItem(${index})" class="material-symbols-outlined text-slate-500 text-lg hover:text-red-400">cancel</button>
                     </div>
                 </div>`).join('');
@@ -214,21 +228,20 @@
         const p = parseInt(document.getElementById('custom-price').value);
         if (!n || isNaN(p)) return;
         state.selectedItems.push({ id: "cus"+Date.now(), name: n, price: p });
-        document.getElementById('custom-name').value = '';
-        document.getElementById('custom-price').value = '';
-        renderMain();
+        renderMain(); // 追加後、自動的に明細エリアが更新される
     }
 
+    // 通信（1.51準拠）
     async function sendSalesData() {
-        if (!state.selectedItems.length || !state.gasUrl) return;
+        if (!state.selectedItems.length || !state.gasUrl) return alert("項目未選択");
         const payload = { timestamp: new Date().toLocaleString('ja-JP'), items: state.selectedItems.map(i => i.name).join(','), total: state.selectedItems.reduce((s,i)=>s+i.price,0) };
         try { 
             await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); 
-            alert("送信成功"); resetSelection();
+            alert("売上を送信しました"); resetSelection();
         } catch(e) { alert("送信エラー"); }
     }
 
-    // 以下、認証・設定関連（1.52から維持）
+    // 設定・履歴関連
     async function runInitialSetup() {
         const name = document.getElementById('setup-salon-name').value;
         const url = document.getElementById('setup-gas-url').value;
@@ -247,11 +260,11 @@
         try {
             const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: pass, year: new Date().getFullYear().toString() }) });
             const data = await res.json();
-            if (data.error) return alert("パスワード不一致");
+            if (data.error) return alert("不一致");
             lastPass = pass; localStorage.setItem('cached_pass', pass);
             localStorage.setItem('last_auth_date', new Date().toLocaleDateString());
             document.getElementById('lock-screen').classList.add('hidden'); renderMain();
-        } catch (e) { alert("認証エラー"); }
+        } catch (e) { alert("エラー"); }
     }
 
     function switchScreen(s) {
@@ -266,15 +279,15 @@
         document.getElementById('gas-url-input').value = state.gasUrl;
         document.getElementById('settings-menu-editor').innerHTML = state.categories.map((cat, cIdx) => `
             <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative">
-                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 text-xs underline">Delete</button>
-                <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold w-40" value="${cat.title}" />
+                <button onclick="deleteCategory(${cIdx})" class="absolute top-4 right-4 text-red-500 text-xs underline font-bold italic">DELETE</button>
+                <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold w-40 outline-none" value="${cat.title}" />
                 <div class="space-y-3 pt-2">
                     ${cat.items.map((item, iIdx) => `
                         <div class="flex gap-2">
                             <input oninput="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="flex-1 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" value="${item.name}" />
                             <input oninput="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-24 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" type="number" value="${item.price}" />
                         </div>`).join('')}
-                    <button onclick="addItem(${cIdx})" class="w-full py-2 bg-white/5 rounded text-[10px] text-slate-400 font-bold">+ 項目追加</button>
+                    <button onclick="addItem(${cIdx})" class="w-full py-2 bg-white/5 rounded text-[10px] text-slate-400 font-bold tracking-widest">+ 項目追加</button>
                 </div>
             </div>`).join('');
     }
@@ -289,7 +302,7 @@
         if (!silent) { alert("Saved!"); switchScreen('main'); }
     }
 
-    function clearGasUrl() { if(confirm('RESET ALL?')) { localStorage.clear(); location.reload(); } }
+    function clearGasUrl() { if(confirm('RESET?')) { localStorage.clear(); location.reload(); } }
     function logout() { localStorage.removeItem('cached_pass'); localStorage.removeItem('last_auth_date'); location.reload(); }
     function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; }
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i"+Date.now(), name: "新メニュー", price: 0 }); renderSettings(); }
@@ -303,7 +316,7 @@
         const months = Object.keys(data.summary).sort().reverse();
         document.getElementById('history-summary').innerHTML = months.map(m => `
             <button onclick="fetchDetails('${m}')" class="flex justify-between p-5 bg-neutral-dark rounded-xl border border-white/5 active:scale-95 shadow-xl">
-                <span class="font-bold text-slate-300">${m}</span><span class="font-bold text-secondary text-lg">¥${data.summary[m].toLocaleString()}</span>
+                <span class="font-bold text-slate-300 uppercase">${m}</span><span class="font-bold text-secondary text-lg italic">¥${data.summary[m].toLocaleString()}</span>
             </button>`).join('');
         switchScreen('history');
     }
@@ -311,8 +324,8 @@
     async function fetchDetails(month) {
         const res = await fetch(state.gasUrl, { method: 'POST', body: JSON.stringify({ action: 'fetch', password: lastPass, month: month }) });
         const data = await res.json();
-        document.getElementById('details-title').textContent = month + " 詳細";
-        document.getElementById('details-list').innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white">¥${d.price.toLocaleString()}</span></div>`).join('');
+        document.getElementById('details-title').textContent = month + " DETAIL";
+        document.getElementById('details-list').innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs"><span class="text-slate-400 font-bold">${d.date}</span><span class="font-black text-white italic">¥${d.price.toLocaleString()}</span></div>`).join('');
         document.getElementById('history-details').classList.remove('hidden');
     }
 

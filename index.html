@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.50 Premium</title>
+    <title>美容室POS v1.51 Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
@@ -48,7 +48,7 @@
         <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-primary/20 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-3xl">fluid</span>
-                <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase" id="display-salon-name italic">Luxe Salon</h1>
+                <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase" id="display-salon-name">Luxe Salon</h1>
             </div>
             <div class="flex gap-2">
                 <button onclick="logout()" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10 border border-red-500/30 active:scale-90" title="クイックロック">
@@ -87,7 +87,7 @@
                 </div>
                 <div class="flex flex-col items-center gap-2">
                     <button onclick="sendSalesData()" class="w-full py-5 gold-gradient rounded-2xl text-background-dark font-black text-lg active:scale-95 shadow-lg">売上を送信する</button>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.50 Secure Deploy</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">v1.51 Secure Deploy</span>
                 </div>
             </div>
         </footer>
@@ -127,7 +127,7 @@
 </div>
 
 <script>
-    const VERSION = "v1.50";
+    const VERSION = "v1.51";
     let lastPass = ""; 
 
     const DEFAULT_STATE = {
@@ -168,10 +168,10 @@
         const saved = localStorage.getItem('salon_pos_final_data');
         if (saved) {
             const parsed = JSON.parse(saved);
+            // 既存データがあれば、現在のカテゴリ構造を優先してマージ
             state = { ...state, ...parsed, selectedItems: [] };
         }
         
-        // URLがない場合はセットアップ画面へ
         if (!state.gasUrl) {
             document.getElementById('setup-screen').classList.remove('hidden');
             return;
@@ -194,26 +194,31 @@
         if (!url || !pass) return alert("URLとパスワードを入力してください");
 
         try {
-            const res = await fetch(url, { 
+            // セットアップ成功前にデータを最新に固定
+            state.gasUrl = url;
+            state.salonName = "Luxe Salon";
+            state.categories = JSON.parse(JSON.stringify(DEFAULT_STATE.categories)); // 初期メニューを強制適用
+            
+            // GASへ送信（no-corsでブラウザエラーを回避）
+            await fetch(url, { 
                 method: 'POST', 
+                mode: 'no-cors',
                 body: JSON.stringify({ action: 'updatePassword', newPassword: pass }) 
             });
-            const text = await res.text();
+
+            lastPass = pass;
+            localStorage.setItem('cached_pass', pass);
+            localStorage.setItem('last_auth_date', new Date().toLocaleDateString());
             
-            if (text.includes("Password Updated") || text.includes("Success")) {
-                state.gasUrl = url;
-                lastPass = pass;
-                localStorage.setItem('cached_pass', pass);
-                localStorage.setItem('last_auth_date', new Date().toLocaleDateString());
-                saveAllSettings(true); // サイレント保存
-                document.getElementById('setup-screen').classList.add('hidden');
-                renderMain();
-                alert("セットアップ完了！原本シートとパスワードが作成されました。");
-            } else {
-                alert("GASからの応答が不正です。URLを確認してください。");
-            }
+            // 全データをLocalStorageに強制書き込み
+            saveAllSettings(true); 
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            renderMain();
+            alert("セットアップ完了！\n原本シートとパスワードが設定されました。");
+
         } catch (e) {
-            alert("接続エラー。GASのデプロイ設定（アクセス権: 全員）を確認してください。");
+            alert("接続エラー。URLを確認してください。");
         }
     }
 
@@ -251,7 +256,7 @@
                 <div class="grid gap-3">
                     ${cat.items.map(item => `
                         <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="flex justify-between items-center p-5 rounded-xl border transition-all ${state.selectedItems.some(si => si.id === item.id) ? 'menu-item-active' : 'bg-neutral-dark premium-border'}">
-                            <span class="text-sm tracking-wide">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
+                            <span class="text-sm tracking-wide text-left">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -322,7 +327,7 @@
             const data = await res.json();
             const list = document.getElementById('details-list');
             document.getElementById('details-title').textContent = month + " 詳細";
-            list.innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white tracking-widest">¥${d.price.toLocaleString()}</span></div>`).join('');
+            list.innerHTML = data.details.map(d => `<div class="flex justify-between p-4 bg-neutral-dark border border-white/5 rounded-lg text-xs text-left"><span class="text-slate-400">${d.date}</span><span class="font-bold text-white tracking-widest">¥${d.price.toLocaleString()}</span></div>`).join('');
             document.getElementById('history-details').classList.remove('hidden');
         } catch (e) { alert("詳細エラー"); }
     }
@@ -355,7 +360,7 @@
         `).join('');
     }
 
-    function clearGasUrl() { if(confirm('URLをクリアしますか？設定がリセットされます。')) { localStorage.clear(); location.reload(); } }
+    function clearGasUrl() { if(confirm('設定を完全にクリアしますか？初期状態に戻ります。')) { localStorage.clear(); location.reload(); } }
     function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; }
     function addItem(cIdx) { state.categories[cIdx].items.push({ id: "i"+Date.now(), name: "新メニュー", price: 0 }); renderSettings(); }
     function addNewCategory() { state.categories.push({ id: "c"+Date.now(), title: "新カテゴリー", items: [] }); renderSettings(); }

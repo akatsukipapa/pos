@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>美容室POS v1.60 Premium Clock</title>
+    <title>美容室POS v1.62 Permanent Name</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
@@ -26,7 +26,7 @@
     <div id="setup-screen" class="fixed inset-0 z-[110] bg-background-dark flex items-center justify-center p-6 hidden">
         <div class="w-full max-w-sm space-y-6 text-center">
             <span class="material-symbols-outlined text-primary text-6xl">settings_suggest</span>
-            <h2 class="text-xl font-black text-primary uppercase tracking-widest">Initial Setup</h2>
+            <h2 class="text-xl font-black text-primary uppercase">Initial Setup</h2>
             <div class="space-y-4">
                 <input id="setup-gas-url" type="text" placeholder="GAS ウェブアプリURL" class="w-full bg-neutral-dark border border-white/10 rounded-xl px-4 py-4 text-sm text-white outline-none focus:border-primary" />
                 <input id="setup-password" type="password" placeholder="新しいパスワード" class="w-full bg-neutral-dark border border-white/10 rounded-xl px-4 py-4 text-center text-white outline-none focus:border-primary" />
@@ -50,18 +50,18 @@
                 <h1 class="text-xl font-extrabold tracking-widest text-primary uppercase" id="display-salon-name">Luxe Salon</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="logout()" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10 border border-red-500/30 active:scale-90"><span class="material-symbols-outlined text-red-400 text-xl">logout</span></button>
-                <button onclick="switchScreen('settings')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark premium-border active:scale-90"><span class="material-symbols-outlined text-primary">settings</span></button>
+                <button onclick="logout()" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10 border border-red-500/30 active:scale-90" title="ログアウト"><span class="material-symbols-outlined text-red-400 text-xl">logout</span></button>
+                <button onclick="openHistoryWithAuth()" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark border border-secondary/30 active:scale-90" title="履歴"><span class="material-symbols-outlined text-secondary">menu_book</span></button>
+                <button onclick="switchScreen('settings')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark premium-border active:scale-90" title="設定"><span class="material-symbols-outlined text-primary">settings</span></button>
             </div>
         </header>
 
         <section class="px-6 py-8 text-left bg-gradient-to-b from-primary/5 to-transparent border-b border-white/5">
-            <div class="flex items-baseline gap-3 clock-font">
-                <span id="display-date" class="text-7xl font-extrabold text-white leading-none">3/20</span>
+            <div class="flex items-baseline gap-4 clock-font">
+                <span id="display-date" class="text-7xl font-extrabold text-white leading-none tracking-tighter">--/--</span>
                 <div class="flex flex-col">
-                    <span id="display-day-time" class="text-xl font-bold text-primary italic leading-none">(金) 14:10</span>
-                    <div id="weather-info" class="flex items-center gap-1 text-slate-400 mt-1">
-                        </div>
+                    <span id="display-day-time" class="text-xl font-bold text-primary italic leading-none">(曜) --:--</span>
+                    <div id="weather-info" class="flex items-center gap-1 text-slate-400 mt-2 min-h-[32px]"></div>
                 </div>
             </div>
         </section>
@@ -91,21 +91,32 @@
             <h1 class="text-xl font-extrabold text-primary uppercase">設定</h1>
         </header>
         <main class="p-4 space-y-6 max-w-md mx-auto text-left">
+            <div class="bg-primary/5 p-4 rounded-2xl border border-primary/20 space-y-4">
+                <div><label class="text-[10px] font-bold text-primary uppercase">サロン名（永久保存）</label>
+                <input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-white mt-1" /></div>
+            </div>
+
             <div class="bg-neutral-dark p-4 rounded-2xl border border-white/5 space-y-4">
-                <div><label class="text-[10px] font-bold text-primary uppercase">サロン名</label><input id="salon-name-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-white" /></div>
-                <div><label class="text-[10px] font-bold text-primary uppercase tracking-widest">Weather API Key (OpenWeather)</label><input id="weather-api-input" type="password" placeholder="キーを入力（非公開）" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-xs text-white" /></div>
-                <div><div class="flex justify-between items-center"><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><button onclick="clearGasUrl()" class="text-[9px] text-red-400 underline">クリア</button></div><input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-xs text-white" /></div>
+                <div><label class="text-[10px] font-bold text-primary uppercase">Weather API Key</label><input id="weather-api-input" type="password" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-xs text-white" /></div>
+                <div><div class="flex justify-between items-center"><label class="text-[10px] font-bold text-primary uppercase">GAS URL</label><button onclick="clearGasUrl()" class="text-[9px] text-red-400 underline font-bold italic">設定をクリア</button></div><input id="gas-url-input" class="w-full bg-background-dark/50 border border-white/10 rounded-lg px-4 py-2 text-xs text-white" /></div>
                 <button onclick="saveAllSettings()" class="w-full py-3 gold-gradient text-background-dark font-black rounded-xl">変更を保存</button>
             </div>
             <div id="settings-menu-editor" class="space-y-6"></div>
         </main>
     </div>
+
+    <div id="history-screen" class="hidden min-h-screen bg-background-dark pb-10">
+        <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-secondary/20 px-6 py-4 flex items-center gap-3">
+            <button onclick="switchScreen('main')" class="w-10 h-10 rounded-full flex items-center justify-center bg-neutral-dark border border-secondary/30"><span class="material-symbols-outlined text-secondary">arrow_back</span></button>
+            <h1 class="text-xl font-extrabold text-secondary uppercase">売上帳簿</h1>
+        </header>
+        <main id="history-summary" class="p-4 max-w-md mx-auto space-y-3"></main>
+    </div>
 </div>
 
 <script>
-    const VERSION = "v1.60";
+    const VERSION = "v1.62";
     let lastPass = ""; 
-
     const DEFAULT_STATE = {
         version: VERSION, salonName: "Luxe Salon", gasUrl: "", weatherApiKey: "", selectedItems: [],
         categories: [
@@ -115,21 +126,21 @@
             { id: "c4", title: "ストレート", items: [{ id: "i15", name: "縮毛矯正", price: 13000 }, { id: "i16", name: "前髪のみ", price: 3000 }, { id: "i17", name: "前髪サイド", price: 5000 }]}
         ]
     };
-
     let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
     function init() {
         const saved = localStorage.getItem('salon_pos_final_data');
         if (saved) { state = { ...state, ...JSON.parse(saved), selectedItems: [] }; }
+        
+        // サロン名だけは個別の保存場所から最優先で上書き
+        const permanentName = localStorage.getItem('salon_name_permanent');
+        if (permanentName) state.salonName = permanentName;
+
         if (!state.gasUrl) { document.getElementById('setup-screen').classList.remove('hidden'); return; }
-        
-        const lastAuth = localStorage.getItem('last_auth_date');
         lastPass = localStorage.getItem('cached_pass') || "";
-        if (lastAuth === new Date().toLocaleDateString() && lastPass) { renderMain(); } 
+        if (localStorage.getItem('last_auth_date') === new Date().toLocaleDateString() && lastPass) { renderMain(); } 
         else { document.getElementById('lock-screen').classList.remove('hidden'); }
-        
-        updateClock();
-        setInterval(updateClock, 10000); // 10秒ごとに更新
+        updateClock(); setInterval(updateClock, 30000);
         if (state.weatherApiKey) fetchWeather();
     }
 
@@ -142,35 +153,23 @@
 
     async function fetchWeather() {
         if (!state.weatherApiKey) return;
-        try {
-            // 位置情報取得（許可が必要）
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const { latitude, longitude } = pos.coords;
-                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${state.weatherApiKey}&units=metric&lang=ja`);
-                const data = await res.json();
-                const icon = data.weather[0].icon;
-                document.getElementById('weather-info').innerHTML = `
-                    <img src="https://openweathermap.org/img/wn/${icon}.png" class="w-8 h-8">
-                    <span class="text-sm font-bold">${Math.round(data.main.temp)}°C</span>
-                    <span class="text-[10px] opacity-70 ml-1">${data.name}</span>
-                `;
-            });
-        } catch (e) { console.error("Weather Error"); }
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&appid=${state.weatherApiKey}&units=metric&lang=ja`);
+            const data = await res.json();
+            document.getElementById('weather-info').innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png" class="w-8 h-8"><span class="text-sm font-bold">${Math.round(data.main.temp)}°C</span><span class="text-[10px] opacity-70 ml-1">${data.name}</span>`;
+        }, () => console.log("Weather location denied"));
     }
 
-    // --- 以降、基本機能（renderMain, saveAllSettings等）は前回と同様 ---
     function renderMain() {
         document.getElementById('display-salon-name').textContent = state.salonName;
         const container = document.getElementById('menu-container');
         container.innerHTML = state.categories.map(cat => `
             <div class="space-y-4">
                 <div class="px-2 border-l-4 border-secondary ml-1"><h2 class="text-lg font-bold text-left">${cat.title}</h2></div>
-                <div class="grid gap-3">
-                    ${cat.items.map(item => `
-                        <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="flex justify-between items-center p-5 rounded-xl border transition-all ${state.selectedItems.some(si => si.id === item.id) ? 'menu-item-active' : 'bg-neutral-dark premium-border'}">
-                            <span class="text-sm tracking-wide text-left">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
-                        </button>
-                    `).join('')}
+                <div class="grid gap-3">${cat.items.map(item => `
+                    <button onclick="toggleItem('${item.id}', '${item.name}', ${item.price})" class="flex justify-between items-center p-5 rounded-xl border transition-all ${state.selectedItems.some(si => si.id === item.id) ? 'menu-item-active' : 'bg-neutral-dark premium-border'}">
+                        <span class="text-sm tracking-wide">${item.name}</span><span class="font-bold">¥${item.price.toLocaleString()}</span>
+                    </button>`).join('')}
                 </div>
             </div>
         `).join('');
@@ -189,10 +188,9 @@
         document.getElementById('total-display').textContent = `¥ ${total.toLocaleString()}`;
         document.getElementById('item-count').textContent = `${state.selectedItems.length}点`;
         const area = document.getElementById('selected-list-area');
-        const container = document.getElementById('selected-tags-container');
         if (state.selectedItems.length > 0) {
             area.classList.remove('hidden');
-            container.innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] rounded-full font-bold">・${item.name} (¥${item.price.toLocaleString()})</span>`).join('');
+            document.getElementById('selected-tags-container').innerHTML = state.selectedItems.map(item => `<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary text-[10px] rounded-full font-bold">・${item.name}</span>`).join('');
         } else { area.classList.add('hidden'); }
     }
 
@@ -201,11 +199,12 @@
     async function sendSalesData() {
         if (!state.selectedItems.length || !state.gasUrl) return alert("URL未設定/項目未選択");
         const payload = { timestamp: new Date().toLocaleString('ja-JP'), items: state.selectedItems.map(i => i.name).join(','), total: state.selectedItems.reduce((s,i)=>s+i.price,0) };
-        try { await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); alert("売上を送信しました"); resetSelection(); } catch(e) { alert("送信エラー"); }
+        await fetch(state.gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        alert("売上を送信しました"); resetSelection();
     }
 
     function switchScreen(screen) {
-        ['main-screen', 'settings-screen'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        ['main-screen', 'settings-screen', 'history-screen'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById(screen + '-screen').classList.remove('hidden');
         if (screen === 'main') renderMain();
         if (screen === 'settings') renderSettings();
@@ -217,18 +216,15 @@
         document.getElementById('weather-api-input').value = state.weatherApiKey || "";
         const editor = document.getElementById('settings-menu-editor');
         editor.innerHTML = state.categories.map((cat, cIdx) => `
-            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4 relative">
-                <div class="grid gap-1"><label class="text-[9px] font-bold text-slate-500 uppercase">カテゴリー名</label>
-                <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold" value="${cat.title}" /></div>
-                <div class="space-y-3 pt-2">
-                    ${cat.items.map((item, iIdx) => `
-                        <div class="flex gap-2">
-                            <input oninput="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="flex-1 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" value="${item.name}" />
-                            <input oninput="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-24 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2 font-mono" type="number" value="${item.price}" />
-                        </div>`).join('')}
+            <div class="bg-neutral-dark p-5 rounded-2xl border border-white/5 space-y-4">
+                <input oninput="state.categories[${cIdx}].title = this.value" class="bg-background-dark border border-white/10 rounded-lg px-3 py-2 text-white font-bold w-full" value="${cat.title}" />
+                <div class="space-y-3">${cat.items.map((item, iIdx) => `
+                    <div class="flex gap-2">
+                        <input oninput="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="flex-1 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" value="${item.name}" />
+                        <input oninput="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-24 bg-background-dark border border-white/10 rounded-lg text-xs text-white p-2" type="number" value="${item.price}" />
+                    </div>`).join('')}
                 </div>
-            </div>
-        `).join('');
+            </div>`).join('');
     }
 
     function saveAllSettings(silent = false) {
@@ -236,15 +232,24 @@
             state.salonName = document.getElementById('salon-name-input').value;
             state.gasUrl = document.getElementById('gas-url-input').value;
             state.weatherApiKey = document.getElementById('weather-api-input').value;
+            // サロン名だけ単独保存
+            localStorage.setItem('salon_name_permanent', state.salonName);
         }
         localStorage.setItem('salon_pos_final_data', JSON.stringify(state));
-        if (!silent) { alert("設定を保存しました"); location.reload(); }
+        if (!silent) { alert("保存しました"); switchScreen('main'); }
+    }
+
+    function clearGasUrl() {
+        if(confirm('設定（GAS URL、APIキー、メニュー）をクリアしますか？\n※サロン名は維持されます。')) {
+            localStorage.removeItem('salon_pos_final_data');
+            localStorage.removeItem('cached_pass');
+            location.reload(); 
+        }
     }
 
     async function runInitialSetup() {
         const url = document.getElementById('setup-gas-url').value;
         const pass = document.getElementById('setup-password').value;
-        if (!url || !pass) return alert("入力してください");
         state.gasUrl = url;
         await fetch(url, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updatePassword', newPassword: pass }) });
         lastPass = pass;
@@ -255,7 +260,6 @@
     }
 
     function logout() { if(confirm('ログアウトしますか？')) { localStorage.removeItem('cached_pass'); location.reload(); } }
-    function clearGasUrl() { if(confirm('初期化しますか？')) { localStorage.clear(); location.reload(); } }
     function updateItem(cIdx, iIdx, key, val) { state.categories[cIdx].items[iIdx][key] = key === 'price' ? parseInt(val) || 0 : val; }
 
     init();
